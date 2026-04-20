@@ -1,0 +1,180 @@
+from flask import Flask, render_template, request, redirect, url_for, session
+from sqlalchemy import create_engine, text
+
+app = Flask(__name__)
+app.secret_key = "supersecretkey"
+
+conn_str = "mysql://root:cset155@localhost/exam"
+engine = create_engine(conn_str, echo=True)
+conn = engine.connect()
+
+
+def get_current_user():
+    if "user_id" not in session:
+        return None
+
+    query = text("""
+    SELECT id, first_name, last_name, email, role
+    FROM users
+    WHERE id = :id
+    """)
+
+    result = conn.execute(query, {"id": session["user_id"]})
+    return result.fetchone()
+
+def is_admin(user):
+    return user and user.role == "admin"
+
+def is_seller(user):
+    return user and user.role in ["seller", "customer"]
+
+def is_customer(user):
+    return user and user.role in ["customer", "seller"]
+
+@app.context_processor
+def inject_user():
+    return dict(current_user=get_current_user())
+
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        first_name = request.form["first_name"]
+        last_name = request.form["last_name"]
+        email = request.form["email"]
+        username = request.form["username"]
+        password = request.form["password"]
+        role = request.form["role"]
+
+        query = text("""
+            INSERT INTO users (first_name, last_name, email, username, password, role
+            VALUES (:first_name, :last_name, :email, :username, :password, :role)
+        """)
+
+        conn.execute(query, {
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "username": username,
+            "password": password,
+            "role": role
+        })
+
+        conn.commit()
+        return redirect(url_for("home"))
+
+    return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        user = conn.execute(text("""
+            SELECT id, role
+            FROM users
+            WHERE email = :email AND password = :password
+        """), {
+            "email": request.form["email"],
+            "password": request.form["password"]
+        }).fetchone()
+
+        if user:
+            session["user_id"] = user.id
+            session["role"] = user.role
+
+        return "Invalid Login"
+
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
