@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, text
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-conn_str = "mysql://root:cset155@localhost/exam"
+conn_str = "mysql://root:cset155@localhost/ecommerce"
 engine = create_engine(conn_str, echo=True)
 conn = engine.connect()
 
@@ -25,11 +25,11 @@ def get_current_user():
 def is_admin(user):
     return user and user.role == "admin"
 
-def is_seller(user):
-    return user and user.role in ["seller", "customer"]
+def is_vendor(user):
+    return user and user.role in ["vendor", "customer"]
 
 def is_customer(user):
-    return user and user.role in ["customer", "seller"]
+    return user and user.role in ["customer", "vendor"]
 
 @app.context_processor
 def inject_user():
@@ -50,7 +50,7 @@ def register():
         role = request.form["role"]
 
         query = text("""
-            INSERT INTO users (first_name, last_name, email, username, password, role
+            INSERT INTO users (first_name, last_name, email, username, password, role)
             VALUES (:first_name, :last_name, :email, :username, :password, :role)
         """)
 
@@ -74,9 +74,9 @@ def login():
         user = conn.execute(text("""
             SELECT id, role
             FROM users
-            WHERE email = :email AND password = :password
+            WHERE username = :username AND password = :password
         """), {
-            "email": request.form["email"],
+            "username": request.form["username"],
             "password": request.form["password"]
         }).fetchone()
 
@@ -84,7 +84,9 @@ def login():
             session["user_id"] = user.id
             session["role"] = user.role
 
-        return "Invalid Login"
+            return redirect(url_for("home"))
+
+        return render_template("login.html", error="Invalid Login")
 
     return render_template("login.html")
 

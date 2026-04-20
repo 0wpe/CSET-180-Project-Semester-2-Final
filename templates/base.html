@@ -17,8 +17,12 @@
         <a href="#">Shop</a>
         <a href="#">Cart</a>
         <a href="#">Orders</a>
-        <a href="/login">Login</a>
-        <a href="/register">Register</a>
+
+        {% if current_user %}
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login/Register</a>
+        {% endif %}
     </nav>
 </header>
 
