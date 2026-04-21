@@ -17,4 +17,20 @@ Sponsored Caskets
 
 Funeral Cakes
 
-Pay people to appear (Mafia / Secret Service / Cry / Rent a Widow)
+Pay people to appear (Mafia / Secret Service / Cry / Rent a Widow / Hire Afrikan Pallbearers -Kaden / Dead Checker--Shotgun Checker)
+
+Coffin Kit (Family Project)
+"Come on Timmy we have to build dad's coffin" -Israel
+"Some families play boardgames others build coffins" - Israel
+
+Viking Sendoff
+
+Greek Wooden Structure Sendoff
+
+Gold Coins for the eyes / Dabloons
+
+Tags (color, kits, deals, price)
+
+Headstones / Rocks
+
+Mummification Services
