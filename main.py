@@ -72,16 +72,18 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
         user = conn.execute(text("""
-            SELECT id, role
+            SELECT id, role, password
             FROM users
-            WHERE username = :username AND password = :password
+            WHERE username = :username
         """), {
-            "username": request.form["username"],
-            "password": request.form["password"]
+            "username": username
         }).fetchone()
 
-        if user:
+        if user and check_password_hash(user.password, password):
             session["user_id"] = user.id
             session["role"] = user.role
 

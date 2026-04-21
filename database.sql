@@ -12,8 +12,6 @@ CREATE TABLE users (
     role ENUM('admin', 'vendor', 'customer') NOT NULL
 );
 
-select * from users;
-
 CREATE TABLE vendors (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNIQUE,
@@ -127,3 +125,5 @@ CREATE TABLE chat_messages (
     FOREIGN KEY (sender_id) REFERENCES users(id),
     FOREIGN KEY (receiver_id) REFERENCES users(id)
 );
+
+select * from users;
