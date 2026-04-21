@@ -9,7 +9,6 @@ conn_str = "mysql://root:cset155@localhost/ecommerce"
 engine = create_engine(conn_str, echo=True)
 conn = engine.connect()
 
-
 def get_current_user():
     if "user_id" not in session:
         return None
