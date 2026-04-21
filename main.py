@@ -9,7 +9,6 @@ conn_str = "mysql://root:cset155@localhost/ecommerce"
 engine = create_engine(conn_str, echo=True)
 conn = engine.connect()
 
-
 def get_current_user():
     if "user_id" not in session:
         return None
@@ -65,23 +64,25 @@ def register():
         })
 
         conn.commit()
-        return redirect(url_for("home"))
+        return redirect(url_for("login"))
 
     return render_template("register.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+
         user = conn.execute(text("""
-            SELECT id, role
+            SELECT id, role, password
             FROM users
-            WHERE username = :username AND password = :password
+            WHERE username = :username
         """), {
-            "username": request.form["username"],
-            "password": request.form["password"]
+            "username": username
         }).fetchone()
 
-        if user:
+        if user and check_password_hash(user.password, password):
             session["user_id"] = user.id
             session["role"] = user.role
 
