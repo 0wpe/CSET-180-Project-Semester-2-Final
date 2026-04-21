@@ -6,16 +6,19 @@
 }
 
 :root {
-    --primary-color: #111;
-    --secondary-color: #f4f4f4;
-    --accent-color: #ff4d4d;
+    --primary-color: white;
+    --secondary-color: black;
+    --accent-color: red;
 
-    --text-color: #333;
+    --primary-text-color: black;
+    --secondary-text-color: black;
+
     --border-radius: 8px;
 
     --topbar-height: 60px;
 
     --font-main: Arial, sans-serif;
+    --font-second: Arial, sans-serif;
 }
 
 /* Start Top Bar */
