@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from sqlalchemy import create_engine, text
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -59,7 +60,7 @@ def register():
             "last_name": last_name,
             "email": email,
             "username": username,
-            "password": password,
+            "password": generate_password_hash(password),
             "role": role
         })
 
