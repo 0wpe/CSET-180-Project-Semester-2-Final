@@ -37,7 +37,12 @@ def inject_user():
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+
+    products = conn.execute(text("""
+    SELECT * FROM products
+    """)).fetchall()
+
+    return render_template("index.html", products=products)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -62,6 +67,19 @@ def register():
             "password": generate_password_hash(password),
             "role": role
         })
+
+        conn.commit()
+
+        if role == "vendor":
+            id = conn.execute(text("""
+                SELECT id FROM users WHERE username = :username
+            """), {"username": username}).fetchone()[0]
+
+            conn.execute(text("""
+                INSERT INTO vendors (user_id)
+                VALUES (:id)
+            """), {"id": id})
+
 
         conn.commit()
         return redirect(url_for("login"))
