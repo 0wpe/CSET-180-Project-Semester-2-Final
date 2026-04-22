@@ -3,5 +3,24 @@
 {% block title %}Coffins R Us{% endblock %}
 
 {% block content %}
+    <div class="products-page">
+        {% for product in products %}
 
+            <div class="card">
+
+                <h2>{{ product.title }}</h2>
+
+                <p>{{ product.description }}</p>
+
+                <p>{{ product.vendor_id }}</p>
+
+                <p>{{ product.warranty_period }}</p>
+
+                <p>{{ product.price }}</p>
+
+                <p>{{ product.inventory }}</p>
+
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
