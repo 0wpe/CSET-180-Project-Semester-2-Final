@@ -127,3 +127,87 @@ CREATE TABLE chat_messages (
 );
 
 select * from users;
+
+INSERT INTO users (first_name, last_name, email, username, password, role) VALUES
+('Alice', 'Admin', 'alice.admin@example.com', 'alice_admin', 'pass1', 'admin'),
+('Bob', 'Admin', 'bob.admin@example.com', 'bob_admin', 'pass2', 'admin'),
+
+('Victor', 'Vendor', 'vendor1@example.com', 'vendor_one', 'pass3', 'vendor'),
+('Vera', 'Vendor', 'vendor2@example.com', 'vendor_two', 'pass4', 'vendor'),
+('Vince', 'Vendor', 'vendor3@example.com', 'vendor_three', 'pass5', 'vendor'),
+
+('Charlie', 'Customer', 'charlie@example.com', 'charlie_c', 'pass6', 'customer'),
+('Diana', 'Customer', 'diana@example.com', 'diana_c', 'pass7', 'customer'),
+('Ethan', 'Customer', 'ethan@example.com', 'ethan_c', 'pass8', 'customer'),
+('Fiona', 'Customer', 'fiona@example.com', 'fiona_c', 'pass9', 'customer'),
+('George', 'Customer', 'george@example.com', 'george_c', 'pass10', 'customer');
+
+INSERT INTO vendors (user_id) VALUES
+(3), (4), (5);
+
+INSERT INTO products (title, description, vendor_id, warranty_period, price, inventory) VALUES
+('Laptop Pro 15', 'High end laptop', 1, 24, 1500.00, 20),
+('Laptop Air 13', 'Lightweight laptop', 1, 12, 999.99, 30),
+('Gaming Mouse X', 'RGB gaming mouse', 1, 6, 49.99, 100),
+
+('Smartphone Z', 'Flagship smartphone', 2, 12, 899.00, 50),
+('Smartphone Mini', 'Compact smartphone', 2, 12, 699.00, 40),
+('Wireless Earbuds', 'Noise cancelling earbuds', 2, 6, 129.99, 80),
+
+('4K Monitor', 'Ultra HD monitor', 3, 18, 399.99, 25),
+('Mechanical Keyboard', 'Blue switch keyboard', 3, 12, 89.99, 60),
+('USB-C Hub', '7-in-1 hub', 3, 6, 39.99, 150),
+('Portable SSD 1TB', 'High speed SSD', 3, 24, 149.99, 40);
+
+INSERT INTO product_variants (product_id, color, size, stock) VALUES
+(1, 'Silver', '15-inch', 10),
+(2, 'Gray', '13-inch', 15),
+(3, 'Black', 'Standard', 50),
+(4, 'Black', '128GB', 20),
+(5, 'Blue', '128GB', 20),
+(6, 'White', 'Standard', 40),
+(7, 'Black', '27-inch', 10),
+(8, 'Black', 'Full-size', 30),
+(9, 'Gray', 'Standard', 70),
+(10, 'Black', '1TB', 20);
+
+
+-- Untimed discounts
+INSERT INTO discounts (product_id, old_price, new_price) VALUES
+(1, 1500.00, 1299.00),
+(4, 899.00, 799.00);
+
+-- Timed discounts
+INSERT INTO discounts (product_id, old_price, new_price, start_time, end_time) VALUES
+(7, 399.99, 349.99, '2026-04-01 00:00:00', '2026-04-30 23:59:59'),
+(10, 149.99, 119.99, '2026-04-10 00:00:00', '2026-04-20 23:59:59');
+
+INSERT INTO carts (user_id) VALUES
+(6), (7), (8);
+
+INSERT INTO cart_items (cart_id, product_variant_id, quantity) VALUES
+(1, 1, 1),   -- Charlie: Laptop Pro 15
+(1, 3, 2),   -- Charlie: Gaming Mouse X
+(2, 4, 1),   -- Diana: Smartphone Z
+(2, 6, 1),   -- Diana: Earbuds
+(3, 7, 1),   -- Ethan: 4K Monitor
+(3, 10, 1);  -- Ethan: SSD
+
+INSERT INTO orders (user_id, status) VALUES
+(6, 'pending'),
+(7, 'confirmed'),
+(8, 'handed_to_delivery'),
+(9, 'shipped'),
+(10, 'shipped'),
+(6, 'shipped'),
+(7, 'pending');
+
+INSERT INTO order_items (order_id, product_variant_id, vendor_id, quantity, price_at_purchase) VALUES
+(1, 1, 1, 1, 1500.00),
+(1, 3, 1, 1, 49.99),
+(2, 4, 2, 1, 899.00),
+(3, 7, 3, 1, 399.99),
+(4, 10, 3, 1, 149.99),
+(5, 6, 2, 1, 129.99),
+(6, 2, 1, 1, 999.99),
+(7, 9, 3, 1, 39.99);
