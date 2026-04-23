@@ -32,9 +32,12 @@
     padding: 0 1rem;
 }
 
-.logo {
-    font-size: 1.2rem;
-    font-weight: bold;
+#logo {
+    height: var(--topbar-height);
+    width: var(--topbar-height);
+    background-image: url("../images/logo/logo.png");
+    background-position: center;
+    background-size: cover;
 }
 
 .nav-links {
