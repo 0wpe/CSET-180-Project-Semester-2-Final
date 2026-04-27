@@ -20,10 +20,7 @@
 
         <div id="sidebar" class="sidebar">
             <div id="sidebar-page">
-                <a href="/account"><img src="../static/images/icons/account.svg" alt="img"></a> <!-- Account -->
-                <a href="/cart"><img src="../static/images/icons/cart.svg" alt="img"></a> <!-- Cart -->
-                <a href="/login"><img src="../static/images/icons/" alt="img"></a> <!-- Logout -->
-
+<!--                Commented these out         -->
 <!--                <a href="/account"><img src="../static/images/icons/account.svg" alt="img"></a> &lt;!&ndash; Account &ndash;&gt;-->
 <!--                <a href="/cart"><img src="../static/images/icons/cart.svg" alt="img"></a> &lt;!&ndash; Cart &ndash;&gt;-->
 <!--                <a href="/login"><img src="../static/images/icons/" alt="img"></a> &lt;!&ndash; Logout &ndash;&gt;-->
@@ -40,9 +37,6 @@
             <form action="/search" method="GET" class="search-form">
                 <input type="text" name="q" placeholder="Search Products..." class="search-input">
             </form>
-
-            <a href="/account"><img src="{{ url_for('static', filename='images/icons/account.svg') }}" alt="img"></a> <!-- Account -->
-            <a href="/cart"><img src="{{ url_for('static', filename='images/icons/cart.svg') }}" alt="img"></a> <!-- Cart -->
 
             <div>
                 <a href="/account"><img src="{{ url_for('static', filename='images/icons/account.svg') }}" class="NavIcons" alt="account img"></a> <!-- Account -->
