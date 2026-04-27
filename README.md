@@ -1,6 +1,6 @@
 Buy 2 Coffins get 1 Free
 
-Promotion for family trageties. Bury your whole family
+Promotion for family tragedies. Bury your whole family
 
 Casket Emporium
 
@@ -17,10 +17,10 @@ Sponsored Caskets
 
 Funeral Cakes
 
-Pay people to appear (Mafia / Secret Service / Cry / Rent a Widow / Hire Afrikan Pallbearers -Kaden / Dead Checker--Shotgun Checker)
+Pay people to appear (Mafia / Secret Service / Cry / Rent a Widow / Hire African Pallbearers -Kaden / Dead Checker--Shotgun Checker)
 
 Coffin Kit (Family Project)
-"Come on Timmy we have to build dad's coffin" -Israel
+"Come on Timmy we have to build dad's coffin" - Israel
 "Some families play boardgames others build coffins" - Israel
 
 Viking Sendoff
@@ -35,4 +35,4 @@ Headstones / Rocks
 
 Mummification Services
 
-Latina Goth Mommy for crying -Kaden
+Latina Goth Mommy for crying - Owen
