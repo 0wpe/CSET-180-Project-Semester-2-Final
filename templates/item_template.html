@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Coffins R Us{% endblock %}
+
+{% block content %}
+
+<div class="item-page">
+
+    <img src="{{ product.image_url }}" class="item-image">
+
+    <h1>{{ product.title }}</h1>
+
+    <p>{{ product.description }}</p>
+
+    <p>Price: ${{ product.price }}</p>
+
+    <p>Inventory: {{ product.inventory }}</p>
+
+</div>
+
+{% endblock %}

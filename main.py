@@ -76,6 +76,19 @@ def search():
 
     return render_template("search.html", products=products, query=q)
 
+@app.route("/search/<int:product_id>")
+def product_page(product_id):
+
+    product = conn.execute(text("""
+    SELECT p.*, pi.image_url
+    FROM products p
+    LEFT JOIN product_images pi ON p.id = pi.product_id
+    WHERE p.id = :id
+    LIMIT 1
+    """), {"id":product_id}).fetchone()
+
+    return render_template("item_template.html",product=product)
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":

@@ -31,6 +31,11 @@
 .card-info {
     flex: 1;
 }
+
+.card-link {
+    text-decoration: none;
+    color: inherit;
+}
 /* End */
 
 .search-form {
@@ -45,6 +50,7 @@
     border: 1px solid #ccc;
 }
 
+/* Start Media Queries */
 @media (max-width: 500px) {
     .card {
         flex-direction: column;
@@ -55,3 +61,4 @@
         height: 180px;
     }
 }
+/* End Media Queries */

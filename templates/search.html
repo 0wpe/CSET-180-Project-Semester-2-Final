@@ -8,6 +8,7 @@
 
 <div class="products-page">
     {% for product in products %}
+    <a href="/search/{{ product.id }}" class="card-link">
         <div class="card">
 
             <div class="card-image">
@@ -26,8 +27,8 @@
                 <p>${{ product.price }}</p>
                 <p>{{ product.inventory }}</p>
             </div>
-
         </div>
+    </a>
     {% endfor %}
 </div>
 
