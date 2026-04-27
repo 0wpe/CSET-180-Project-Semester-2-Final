@@ -42,7 +42,39 @@ def home():
     SELECT * FROM products
     """)).fetchall()
 
-    return render_template("index.html", products=products)
+    sponsored = conn.execute(text("""
+    SELECT * FROM products
+    LIMIT 3
+    """)).fetchall()
+
+    discounted = conn.execute(text("""
+    SELECT p.* FROM products p
+    JOIN discounts d ON p.id = d.product_id
+    """)).fetchall()
+
+    return render_template("index.html", products=products, sponsored=sponsored, discounted=discounted)
+
+@app.route("/search")
+def search():
+
+    q = request.args.get("q","")
+
+    if q:
+        products = conn.execute(text("""
+        SELECT p.*, pi.image_url
+        FROM products p
+        LEFT JOIN product_images pi ON p.id = pi.product_id
+        WHERE p.title LIKE :q
+        """),{"q":f"%{q}%"}).fetchall()
+
+    else:
+        products = conn.execute(text("""
+        SELECT p.*, pi.image_url
+        FROM products p
+        LEFT JOIN product_images pi ON p.id = pi.product_id
+        """)).fetchall()
+
+    return render_template("search.html", products=products, query=q)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

@@ -5,6 +5,10 @@
     font-family: Arial, sans-serif;
 }
 
+body {
+    margin: 0;
+}
+
 :root {
     --primary-color: white;
     --secondary-color: black;
@@ -31,6 +35,58 @@
     color: white;
     padding: 0 1rem;
 }
+
+/* Start Menu Button */
+.menu-btn {
+    top: 15px;
+    left: 15px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Sidebar */
+.sidebar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: -250px; /* Hides menu by default */
+    width: 250px;
+    height: 100vh;
+    /* padding-top: var(--topbar-height); */
+    transition: 0.3s;
+}
+
+/* Open Menu */
+.sidebar.active {
+    left: 0;
+    width: 100%;
+}
+
+#sidebar-page {
+    width: 80%;
+    height: 100%;
+    background-color: grey;
+}
+
+#sidebar-blank {
+    display: flex;
+    justify-content: center;
+    width: 20%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.85)
+}
+
+#x {
+    font-size: 3rem;
+    /* font-weight: 100; */
+    margin-top: 2rem;
+}
+
+#x:hover {
+    cursor: pointer;
+}
+
+/* End Menu Button */
 
 #logo {
     height: var(--topbar-height);

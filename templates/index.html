@@ -3,24 +3,27 @@
 {% block title %}Coffins R Us{% endblock %}
 
 {% block content %}
+
+    <h2>Sponsored</h2>
     <div class="products-page">
-        {% for product in products %}
-
-            <div class="card">
-
+        {% for product in sponsored %}
+            <div class="card sponsored">
                 <h2>{{ product.title }}</h2>
-
                 <p>{{ product.description }}</p>
-
-                <p>{{ product.vendor_id }}</p>
-
-                <p>{{ product.warranty_period }}</p>
-
                 <p>${{ product.price }}</p>
-
-                <p>{{ product.inventory }}</p>
-
             </div>
         {% endfor %}
     </div>
+
+    <h2>Discounted Items</h2>
+    <div class="products-page">
+        {% for product in discounted %}
+            <div class="card discount">
+                <h2>{{ product.title }}</h2>
+                <p>{{ product.description }}</p>
+                <p>${{ product.price }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
 {% endblock %}

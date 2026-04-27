@@ -126,6 +126,8 @@ CREATE TABLE chat_messages (
     FOREIGN KEY (receiver_id) REFERENCES users(id)
 );
 
+use ecommerce;
+
 select * from users;
 
 INSERT INTO users (first_name, last_name, email, username, password, role) VALUES
