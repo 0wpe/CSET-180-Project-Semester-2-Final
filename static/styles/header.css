@@ -107,4 +107,12 @@ body {
     text-decoration: none;
     font-size: 0.9rem;
 }
+.NavIcons{
+    display: inline;
+    padding: 2px;
+    border: 1px solid white;
+    height: 40px;
+    width: 40px;
+    color: white;
+    }
 /* End Top Bar */

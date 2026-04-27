@@ -23,6 +23,10 @@
                 <a href="/account"><img src="../static/images/icons/account.svg" alt="img"></a> <!-- Account -->
                 <a href="/cart"><img src="../static/images/icons/cart.svg" alt="img"></a> <!-- Cart -->
                 <a href="/login"><img src="../static/images/icons/" alt="img"></a> <!-- Logout -->
+
+<!--                <a href="/account"><img src="../static/images/icons/account.svg" alt="img"></a> &lt;!&ndash; Account &ndash;&gt;-->
+<!--                <a href="/cart"><img src="../static/images/icons/cart.svg" alt="img"></a> &lt;!&ndash; Cart &ndash;&gt;-->
+<!--                <a href="/login"><img src="../static/images/icons/" alt="img"></a> &lt;!&ndash; Logout &ndash;&gt;-->
             </div>
             <div id="sidebar-blank" onclick="toggleMenu()">
                 <div id="x">×</div>
@@ -40,6 +44,10 @@
             <a href="/account"><img src="{{ url_for('static', filename='images/icons/account.svg') }}" alt="img"></a> <!-- Account -->
             <a href="/cart"><img src="{{ url_for('static', filename='images/icons/cart.svg') }}" alt="img"></a> <!-- Cart -->
 
+            <div>
+                <a href="/account"><img src="{{ url_for('static', filename='images/icons/account.svg') }}" class="NavIcons" alt="account img"></a> <!-- Account -->
+                <a href="/cart"><img src="{{ url_for('static', filename='images/icons/cart.svg') }}" class="NavIcons" alt="cart img"></a> <!-- Cart -->
+            </div>
 
             {% if current_user %}
                 <a href="/logout"><img src="{{ url_for('static', filename='images/icons/logout.svg') }}" alt="img"></a> <!-- Logout -->
