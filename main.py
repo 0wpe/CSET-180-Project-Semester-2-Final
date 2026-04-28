@@ -162,8 +162,19 @@ def logout():
 
 @app.route("/cart")
 def cart():
+    if 'user_id' not in session:
+        return redirect('/login')
+    
+    if session["role"] != "customer": 
+        return redirect('/home')
+    
+    user_id=session["user_id"]
+    cart_items = conn.execute(text("""
+        SELECT * FROM cart_items Natural Join product_variants Natural Join products WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
+        """), {"user_id": user_id}).fetchall()
+    print("cart items:",cart_items)
+    return render_template("cart.html",cart_items=cart_items)
 
-    return render_template("cart.html")
 
 
 

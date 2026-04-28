@@ -4,23 +4,23 @@
 
 {% block content %}
     <div class="auth-container">
-        <div id="cart" class="auth-form">
+        <div id="cart" class="cart auth-form">
             <h2>Cart</h2>
-            {% if cart %}
-                {% for item in cart %}
+            {% if cart_items %}
+                {% for item in cart_items %}
                     <div class="card">
 
                         <h2>{{ item.title }}</h2>
 
-                        <p>{{ item.description }}</p>
+                        <p>{{ description }}</p>
 
-                        <p>{{ item.vendor_id }}</p>
+                        <p>Item id:{{ item.id }}</p>
+                        
+                        <p>Product varient:{{ item.product_variant_id }}</p>
 
-                        <p>{{ item.warranty_period }}</p>
+                        <p>Unit Price:${{ item.price }}</p>
 
-                        <p>${{ item.price }}</p>
-
-                        <p>{{ item.inventory }}</p>
+                        <p>Quantity:{{ item.quantity }}</p>
 
                     </div>
                 {% endfor %}

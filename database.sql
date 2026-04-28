@@ -213,3 +213,4 @@ INSERT INTO order_items (order_id, product_variant_id, vendor_id, quantity, pric
 (5, 6, 2, 1, 129.99),
 (6, 2, 1, 1, 999.99),
 (7, 9, 3, 1, 39.99);
+
