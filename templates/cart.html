@@ -1,3 +1,16 @@
+<style>
+    .content_container{
+        display:flex;
+        flex-direction:column;
+    }
+
+    .info{
+        display:flex;
+        flex-direction:row;
+        justify-content:space-between;
+        gap:10px;
+    }
+</style>
 {% extends "base.html" %}
 
 {% block title %}Cart{% endblock %}
@@ -9,19 +22,35 @@
             {% if cart_items %}
                 {% for item in cart_items %}
                     <div class="card">
+                        <div class="content_container">
+                            <div class="title">
+                                <h3>{{ item.title }}</h3>
+                            </div>
+                            
+                            <div class="info">
+                                <p>{{ description }}</p>
 
-                        <h2>{{ item.title }}</h2>
+                                <p>Item id: {{ item.id }}</p>
+                                
+                                <p>Product varient: {{ item.product_variant_id }}</p>
 
-                        <p>{{ description }}</p>
+                                <!-- <p>Unit Price: ${{ item.price }}</p> -->
 
-                        <p>Item id:{{ item.id }}</p>
-                        
-                        <p>Product varient:{{ item.product_variant_id }}</p>
+                                <p>Quantity:</p>
+                                <form action="/update_cart_quantity" method="post">
+                                    <input type="hidden" name="id" value="{{ item.id }}">
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.stock }}" onchange="this.form.submit()">
+                                </form>
 
-                        <p>Unit Price:${{ item.price }}</p>
+                                <p>Price: ${{ item.price * item.quantity}}</p>
 
-                        <p>Quantity:{{ item.quantity }}</p>
-
+                                <form action="/remove_cart_item" method="post" id="remove_item">
+                                    <input type="hidden" name="id" value="{{ item.id }}">
+                                    <button type="submit" form="remove_item" value="Submit">×</button>
+                                </form>
+                                
+                            </div>
+                        </div>
                     </div>
                 {% endfor %}
             {% else %}

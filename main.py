@@ -176,6 +176,28 @@ def cart():
     print("cart items:",cart_items)
     return render_template("cart.html",cart_items=cart_items)
 
+@app.route("/update_cart_quantity", methods=['POST'])
+def update_cart_quantity():
+    item_id = request.form['id']
+    quantity = request.form['quantity']
+
+    conn.execute(text("""
+    UPDATE cart_items SET quantity = :quantity WHERE id = :item_id
+    """), {"item_id": item_id, "quantity": quantity})    
+    conn.commit()
+
+    return redirect('/cart')
+
+@app.route("/remove_cart_item", methods=['POST'])
+def remove_cart_item():
+    item_id = request.form['id']
+
+    conn.execute(text("""
+    DELETE FROM cart_items WHERE id = :item_id
+    """), {"item_id": item_id})    
+    conn.commit()
+
+    return redirect('/cart')
 
 #Account page
 @app.route("/account")
@@ -185,6 +207,7 @@ def account():
         return redirect(url_for("login"))
 
     return render_template("account.html", user=user)
+
 
 
 
