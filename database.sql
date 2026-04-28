@@ -128,89 +128,95 @@ CREATE TABLE chat_messages (
 
 use ecommerce;
 
-select * from users;
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE chat_messages;
+TRUNCATE TABLE complaints;
+TRUNCATE TABLE reviews;
+TRUNCATE TABLE order_items;
+TRUNCATE TABLE orders;
+TRUNCATE TABLE cart_items;
+TRUNCATE TABLE carts;
+TRUNCATE TABLE product_variants;
+TRUNCATE TABLE discounts;
+TRUNCATE TABLE product_images;
+TRUNCATE TABLE products;
+TRUNCATE TABLE vendors;
+TRUNCATE TABLE users;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO users (first_name, last_name, email, username, password, role) VALUES
-('Alice', 'Admin', 'alice.admin@example.com', 'alice_admin', 'pass1', 'admin'),
-('Bob', 'Admin', 'bob.admin@example.com', 'bob_admin', 'pass2', 'admin'),
-
-('Victor', 'Vendor', 'vendor1@example.com', 'vendor_one', 'pass3', 'vendor'),
-('Vera', 'Vendor', 'vendor2@example.com', 'vendor_two', 'pass4', 'vendor'),
-('Vince', 'Vendor', 'vendor3@example.com', 'vendor_three', 'pass5', 'vendor'),
-
-('Charlie', 'Customer', 'charlie@example.com', 'charlie_c', 'pass6', 'customer'),
-('Diana', 'Customer', 'diana@example.com', 'diana_c', 'pass7', 'customer'),
-('Ethan', 'Customer', 'ethan@example.com', 'ethan_c', 'pass8', 'customer'),
-('Fiona', 'Customer', 'fiona@example.com', 'fiona_c', 'pass9', 'customer'),
-('George', 'Customer', 'george@example.com', 'george_c', 'pass10', 'customer');
+('Admin', 'User', 'admin@test.com', 'admin', 'hashed_pw', 'admin'),
+('John', 'Vendor', 'john@shop.com', 'johnvendor', 'hashed_pw', 'vendor'),
+('Sarah', 'Vendor', 'sarah@shop.com', 'sarahvendor', 'hashed_pw', 'vendor'),
+('Mike', 'Customer', 'mike@test.com', 'mike123', 'hashed_pw', 'customer'),
+('Emma', 'Customer', 'emma@test.com', 'emma123', 'hashed_pw', 'customer');
 
 INSERT INTO vendors (user_id) VALUES
-(3), (4), (5);
+(2),
+(3);
 
 INSERT INTO products (title, description, vendor_id, warranty_period, price, inventory) VALUES
-('Laptop Pro 15', 'High end laptop', 1, 24, 1500.00, 20),
-('Laptop Air 13', 'Lightweight laptop', 1, 12, 999.99, 30),
-('Gaming Mouse X', 'RGB gaming mouse', 1, 6, 49.99, 100),
+('Basic T-Shirt', 'Cotton t-shirt', 1, 12, 19.99, 100),
+('Running Shoes', 'Lightweight running shoes', 1, 24, 79.99, 50),
+('Hoodie', 'Warm winter hoodie', 2, 18, 39.99, 80),
+('Snapback Hat', 'Stylish hat', 2, 6, 14.99, 120);
 
-('Smartphone Z', 'Flagship smartphone', 2, 12, 899.00, 50),
-('Smartphone Mini', 'Compact smartphone', 2, 12, 699.00, 40),
-('Wireless Earbuds', 'Noise cancelling earbuds', 2, 6, 129.99, 80),
-
-('4K Monitor', 'Ultra HD monitor', 3, 18, 399.99, 25),
-('Mechanical Keyboard', 'Blue switch keyboard', 3, 12, 89.99, 60),
-('USB-C Hub', '7-in-1 hub', 3, 6, 39.99, 150),
-('Portable SSD 1TB', 'High speed SSD', 3, 24, 149.99, 40);
+INSERT INTO product_images (product_id, image_url) VALUES
+(1, 'tshirt1.jpg'),
+(1, 'tshirt2.jpg'),
+(2, 'shoes1.jpg'),
+(3, 'hoodie1.jpg'),
+(4, 'hat1.jpg');
 
 INSERT INTO product_variants (product_id, color, size, stock) VALUES
-(1, 'Silver', '15-inch', 10),
-(2, 'Gray', '13-inch', 15),
-(3, 'Black', 'Standard', 50),
-(4, 'Black', '128GB', 20),
-(5, 'Blue', '128GB', 20),
-(6, 'White', 'Standard', 40),
-(7, 'Black', '27-inch', 10),
-(8, 'Black', 'Full-size', 30),
-(9, 'Gray', 'Standard', 70),
-(10, 'Black', '1TB', 20);
+(1, 'Red', 'M', 10),
+(1, 'Blue', 'L', 5),
 
+(2, 'Black', '42', 8),
+(2, 'White', '43', 6),
 
--- Untimed discounts
-INSERT INTO discounts (product_id, old_price, new_price) VALUES
-(1, 1500.00, 1299.00),
-(4, 899.00, 799.00);
+(3, 'Black', 'S', 12),
+(3, 'Grey', 'M', 7),
 
--- Timed discounts
+(4, 'Black', 'One Size', 20);
+
 INSERT INTO discounts (product_id, old_price, new_price, start_time, end_time) VALUES
-(7, 399.99, 349.99, '2026-04-01 00:00:00', '2026-04-30 23:59:59'),
-(10, 149.99, 119.99, '2026-04-10 00:00:00', '2026-04-20 23:59:59');
+(2, 79.99, 59.99, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY)),
+(3, 39.99, 29.99, NOW(), DATE_ADD(NOW(), INTERVAL 5 DAY));
 
 INSERT INTO carts (user_id) VALUES
-(6), (7), (8);
+(4),
+(5);
 
 INSERT INTO cart_items (cart_id, product_variant_id, quantity) VALUES
-(1, 1, 1),   -- Charlie: Laptop Pro 15
-(1, 3, 2),   -- Charlie: Gaming Mouse X
-(2, 4, 1),   -- Diana: Smartphone Z
-(2, 6, 1),   -- Diana: Earbuds
-(3, 7, 1),   -- Ethan: 4K Monitor
-(3, 10, 1);  -- Ethan: SSD
+(1, 1, 2),
+(1, 3, 1),
+(2, 5, 1),
+(2, 7, 3);
 
 INSERT INTO orders (user_id, status) VALUES
-(6, 'pending'),
-(7, 'confirmed'),
-(8, 'handed_to_delivery'),
-(9, 'shipped'),
-(10, 'shipped'),
-(6, 'shipped'),
-(7, 'pending');
+(4, 'pending'),
+(5, 'confirmed');
 
 INSERT INTO order_items (order_id, product_variant_id, vendor_id, quantity, price_at_purchase) VALUES
-(1, 1, 1, 1, 1500.00),
-(1, 3, 1, 1, 49.99),
-(2, 4, 2, 1, 899.00),
-(3, 7, 3, 1, 399.99),
-(4, 10, 3, 1, 149.99),
-(5, 6, 2, 1, 129.99),
-(6, 2, 1, 1, 999.99),
-(7, 9, 3, 1, 39.99);
+(1, 1, 1, 2, 19.99),
+(1, 3, 1, 1, 79.99),
 
+(2, 5, 2, 1, 39.99),
+(2, 7, 2, 3, 14.99);
+
+INSERT INTO reviews (user_id, product_id, rating, description, image_url) VALUES
+(4, 1, 5, 'Great shirt!', NULL),
+(5, 3, 4, 'Very warm hoodie', NULL);
+
+INSERT INTO complaints (user_id, order_item_id, type, status, title, description) VALUES
+(4, 1, 'return', 'pending', 'Wrong size', 'The shirt is too small'),
+(5, 3, 'refund', 'processing', 'Damaged item', 'Hoodie arrived damaged');
+
+INSERT INTO chat_messages (sender_id, receiver_id, message, image_url) VALUES
+(4, 2, 'Hi, do you have this in stock?', NULL),
+(2, 4, 'Yes, it is available!', NULL),
+(5, 3, 'When will my order ship?', NULL),
+(3, 5, 'It ships tomorrow.', NULL);

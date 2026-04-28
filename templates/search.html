@@ -29,7 +29,7 @@
                 </a>
 
                 <form action="/add_to_cart" method="POST">
-                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <input type="hidden" name="product_variant_id" value="{{ product.variant_id }}">
                     <input type="number" name="quantity" value="1" min="1" class="qty-input">
                     <button type="submit">Add to Cart</button>
                 </form>

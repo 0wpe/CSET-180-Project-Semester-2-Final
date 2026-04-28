@@ -61,9 +61,10 @@ def search():
 
     if q:
         products = conn.execute(text("""
-        SELECT p.*, pi.image_url
+        SELECT p.*, pi.image_url, pv.id AS variant_id
         FROM products p
         LEFT JOIN product_images pi ON p.id = pi.product_id
+        JOIN product_variants pv ON pv.product_id = p.id
         WHERE p.title LIKE :q
         """),{"q":f"%{q}%"}).fetchall()
 
@@ -177,7 +178,6 @@ def cart():
     print("cart items:",cart_items)
     return render_template("cart.html",cart_items=cart_items)
 
-<<<<<<< Updated upstream
 @app.route("/update_cart_quantity", methods=['POST'])
 def update_cart_quantity():
     item_id = request.form['id']
@@ -200,7 +200,7 @@ def remove_cart_item():
     conn.commit()
 
     return redirect('/cart')
-=======
+
 # Add to Cart
 @app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
@@ -208,7 +208,7 @@ def add_to_cart():
         return redirect(url_for('login'))
 
     user_id = session["user_id"]
-    product_id = int(request.form["product_id"])
+    product_variant_id = int(request.form["product_variant_id"])
     quantity = int(request.form.get("quantity", 1))
 
     # Get or Create Cart
@@ -235,7 +235,7 @@ def add_to_cart():
     WHERE cart_id = :cart_id AND product_variant_id = :product_id
     """), {
         "cart_id":cart_id,
-        "product_id":product_id
+        "product_id":product_variant_id
     }).fetchone()
 
     if item:
@@ -253,14 +253,13 @@ def add_to_cart():
         VALUES (:cart_id, :product_id, :quantity)
         """), {
             "cart_id":cart_id,
-            "product_id":product_id,
+            "product_id":product_variant_id,
             "quantity":quantity
         })
 
     conn.commit()
 
     return redirect(request.referrer)
->>>>>>> Stashed changes
 
 #Account page
 @app.route("/account")
