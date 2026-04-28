@@ -155,6 +155,7 @@ def login():
 
     return render_template("login.html")
 
+#Log out
 @app.route("/logout")
 def logout():
     session.clear()
@@ -176,8 +177,14 @@ def cart():
     return render_template("cart.html",cart_items=cart_items)
 
 
+#Account page
+@app.route("/account")
+def account():
+    user = get_current_user()
+    if not user:
+        return redirect(url_for("login"))
 
-
+    return render_template("account.html", user=user)
 
 
 
