@@ -46,7 +46,7 @@
             {% if current_user %}
                 <a href="/logout"><img src="{{ url_for('static', filename='images/icons/logout.svg') }}" alt="img"></a> <!-- Logout -->
             {% else %}
-                <a href="/login">Login</a> <!-- Login -->
+                <a href="/login" id="NavLogin">Login</a> <!-- Login -->
             {% endif %}
         </nav>
     </header>
