@@ -12,7 +12,7 @@ body {
 :root {
     --primary-color: white;
     --secondary-color: black;
-    --accent-color: red;
+    --accent-color: rgb(171, 29, 38);
 
     --primary-text-color: black;
     --secondary-text-color: black;
