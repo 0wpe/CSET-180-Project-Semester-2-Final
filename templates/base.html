@@ -16,7 +16,7 @@
 
         <!-- Menu Button -->
         <a class="menu-btn" onclick="toggleMenu()">☰</a>
-<!--        <button class="menu-btn" onclick="toggleMenu()">☰</button>-->
+        <!--<button class="menu-btn" onclick="toggleMenu()">☰</button>-->
 
         <div id="sidebar" class="sidebar">
             <div id="sidebar-page">
@@ -43,8 +43,8 @@
                 <a href="/cart"><img src="{{ url_for('static', filename='images/icons/cart.svg') }}" class="NavIcons" alt="cart img"></a> <!-- Cart -->
             </div>
 
-            {% if current_user %}
-                <a href="/logout"><img src="{{ url_for('static', filename='images/icons/logout.svg') }}" alt="img"></a> <!-- Logout -->
+            {% if session.get("user_id") %}
+                <a href="/logout"><img src="{{ url_for('static', filename='images/icons/logout.svg') }}" class="NavIcons" alt="logout img"></a> <!-- Logout -->
             {% else %}
                 <a href="/login">Login</a> <!-- Login -->
             {% endif %}

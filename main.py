@@ -20,7 +20,7 @@ def get_current_user():
     """)
 
     result = conn.execute(query, {"id": session["user_id"]})
-    return result.fetchone()
+    return result.mappings().fetchone()
 
 def is_admin(user):
     return user and user.role == "admin"
@@ -154,6 +154,11 @@ def login():
         return render_template("login.html", error="Invalid Login")
 
     return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("home"))
 
 @app.route("/cart")
 def cart():
