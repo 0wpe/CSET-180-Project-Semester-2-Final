@@ -162,6 +162,15 @@ def logout():
     session.clear()
     return redirect(url_for("home"))
 
+def cart_Total(user_id):
+    cart_items = conn.execute(text("""
+        SELECT * FROM cart_items Natural Join product_variants Natural Join products WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
+        """), {"user_id": user_id}).fetchall()
+    total=0
+    for i in cart_items:
+        total+=(i.price*i.quantity)
+    return total
+
 # Cart
 @app.route("/cart")
 def cart():
@@ -173,10 +182,14 @@ def cart():
     
     user_id=session["user_id"]
     cart_items = conn.execute(text("""
-        SELECT * FROM cart_items Natural Join product_variants Natural Join products WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
+        SELECT *
+        FROM cart_items ci
+        JOIN product_variants pv ON ci.product_variant_id = pv.id
+        JOIN products p ON pv.product_id = p.id
+        WHERE ci.cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
         """), {"user_id": user_id}).fetchall()
     print("cart items:",cart_items)
-    return render_template("cart.html",cart_items=cart_items)
+    return render_template("cart.html",cart_items=cart_items,cart_Total=cart_Total(user_id))
 
 @app.route("/update_cart_quantity", methods=['POST'])
 def update_cart_quantity():
