@@ -161,6 +161,7 @@ def logout():
     session.clear()
     return redirect(url_for("home"))
 
+# Cart
 @app.route("/cart")
 def cart():
     if 'user_id' not in session:
@@ -176,6 +177,7 @@ def cart():
     print("cart items:",cart_items)
     return render_template("cart.html",cart_items=cart_items)
 
+<<<<<<< Updated upstream
 @app.route("/update_cart_quantity", methods=['POST'])
 def update_cart_quantity():
     item_id = request.form['id']
@@ -198,6 +200,67 @@ def remove_cart_item():
     conn.commit()
 
     return redirect('/cart')
+=======
+# Add to Cart
+@app.route("/add_to_cart", methods=["POST"])
+def add_to_cart():
+    if "user_id" not in session:
+        return redirect(url_for('login'))
+
+    user_id = session["user_id"]
+    product_id = int(request.form["product_id"])
+    quantity = int(request.form.get("quantity", 1))
+
+    # Get or Create Cart
+    cart = conn.execute(text("""
+    SELECT id FROM carts WHERE user_id = :user_id
+    """), {"user_id":user_id}).fetchone()
+
+    if not cart:
+        conn.execute(text("""
+        INSERT INTO carts (user_id)
+        VALUES (:user_id)
+        """), {"user_id":user_id})
+        conn.commit()
+
+        cart = conn.execute(text("""
+        SELECT id FROM carts WHERE user_id = :user_id
+        """), {"user_id":user_id}).fetchone()
+
+    cart_id = cart[0]
+
+    # Checks if item already exists
+    item = conn.execute(text("""
+    SELECT id, quantity FROM cart_items
+    WHERE cart_id = :cart_id AND product_variant_id = :product_id
+    """), {
+        "cart_id":cart_id,
+        "product_id":product_id
+    }).fetchone()
+
+    if item:
+        conn.execute(text("""
+        UPDATE cart_items
+        SET quantity = quantity + :quantity
+        WHERE id = :id
+        """), {
+            "quantity":quantity,
+            "id":item[0]
+        })
+    else:
+        conn.execute(text("""
+        INSERT INTO cart_items (cart_id, product_variant_id, quantity)
+        VALUES (:cart_id, :product_id, :quantity)
+        """), {
+            "cart_id":cart_id,
+            "product_id":product_id,
+            "quantity":quantity
+        })
+
+    conn.commit()
+
+    return redirect(request.referrer)
+>>>>>>> Stashed changes
 
 #Account page
 @app.route("/account")

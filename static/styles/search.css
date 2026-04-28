@@ -50,6 +50,12 @@
     border: 1px solid #ccc;
 }
 
+.qty-input {
+    width: 60px;
+    padding: 5px;
+    margin-right: 10px;
+}
+
 /* Start Media Queries */
 @media (max-width: 500px) {
     .card {
