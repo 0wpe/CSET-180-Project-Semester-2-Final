@@ -164,7 +164,11 @@ def logout():
 
 def cart_Total(user_id):
     cart_items = conn.execute(text("""
-        SELECT * FROM cart_items Natural Join product_variants Natural Join products WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
+        SELECT *
+        FROM cart_items ci
+        JOIN product_variants pv ON ci.product_variant_id = pv.id
+        JOIN products p ON pv.product_id = p.id
+        WHERE ci.cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
         """), {"user_id": user_id}).fetchall()
     total=0
     for i in cart_items:
@@ -182,7 +186,10 @@ def cart():
     
     user_id=session["user_id"]
     cart_items = conn.execute(text("""
-        SELECT *
+        SELECT ci.id AS cart_item_id,
+        ci.quantity,
+        pv.*,
+        p.*
         FROM cart_items ci
         JOIN product_variants pv ON ci.product_variant_id = pv.id
         JOIN products p ON pv.product_id = p.id

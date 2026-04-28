@@ -10,6 +10,13 @@
         justify-content:space-between;
         gap:10px;
     }
+
+    .remove_btn{
+        width:100%;
+        display:flex;
+        justify-content:end
+    }
+
 </style>
 {% extends "base.html" %}
 
@@ -28,7 +35,7 @@
                             </div>
                             
                             <div class="info">
-                                <p>{{ description }}</p>
+                                <p>{{ item.description }}</p>
 
                                 <p>Item id: {{ item.id }}</p>
                                 
@@ -38,17 +45,17 @@
 
                                 <p>Quantity:</p>
                                 <form action="/update_cart_quantity" method="post">
-                                    <input type="hidden" name="id" value="{{ item.id }}">
+                                    <input type="hidden" name="id" value="{{ item.cart_item_id }}">
                                     <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.stock }}" onchange="this.form.submit()">
                                 </form>
 
                                 <p>Price: ${{ item.price * item.quantity}}</p>
 
-                                <form action="/remove_cart_item" method="post" id="remove_item">
-                                    <input type="hidden" name="id" value="{{ item.id }}">
-                                    <button type="submit" form="remove_item" value="Submit">×</button>
+                                <form action="/remove_cart_item" class="remove_btn" method="post">
+                                    <input type="hidden" name="id" value="{{ item.cart_item_id }}">
+                                    <button type="submit">×</button>
                                 </form>
-                                
+
                             </div>
                         </div>
                     </div>
