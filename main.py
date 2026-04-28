@@ -20,7 +20,7 @@ def get_current_user():
     """)
 
     result = conn.execute(query, {"id": session["user_id"]})
-    return result.fetchone()
+    return result.mappings().fetchone()
 
 def is_admin(user):
     return user and user.role == "admin"
