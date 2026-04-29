@@ -1,0 +1,124 @@
+<style>
+.account-inner {
+    max-width: 500px;
+    margin: auto;
+    padding: 10px;
+}
+
+.account-inner h2 {
+    margin-bottom: 15px;
+}
+
+/* GRID */
+.account-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+/* BASE CARD (mobile) */
+.account-card {
+    display: block;
+    padding: 18px;
+    background: #222;
+    color: white;
+    text-align: center;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.account-card h3 {
+    margin-bottom: 6px;
+    font-size: 1.1rem;
+}
+
+.account-card p {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+/* HOVER (works on desktop, harmless on mobile) */
+.account-card:hover {
+    background: #2d2d2d;
+}
+
+/* TABLET */
+@media (min-width: 600px) {
+    .account-inner {
+        max-width: 650px;
+    }
+
+    .account-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* DESKTOP — THIS IS WHERE IT FEELS LIKE CARDS */
+@media (min-width: 900px) {
+    .account-inner {
+        max-width: 800px;
+    }
+
+    .account-grid {
+        gap: 20px;
+    }
+
+    .account-card {
+        padding: 28px;
+        text-align: left;
+
+        /* 👇 key “card” styling */
+        background: #1e1e1e;
+        border: 1px solid #333;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+
+    .account-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+        border-color: #444;
+    }
+}
+</style>
+
+{% extends "base.html" %}
+
+{% block title %}My Account{% endblock %}
+
+{% block content %}
+<div class="account-container">
+
+    <div class="account-inner">
+        <h2>Welcome, {{ current_user.first_name }}!</h2>
+
+        <div class="account-grid">
+            <a href="/orders" class="account-card">
+                <h3>Track Orders</h3>
+                <p>View current orders and their status</p>
+            </a>
+            <a href="/orders/history" class="account-card">
+                <h3>Order History</h3>
+                <p>View your order history</p>
+            </a>
+            <a href="/inbox" class="account-card">
+                <h3>Inbox</h3>
+                <p>Open your inbox</p>
+            </a>
+            <a href="/chat" class="account-card">
+                <h3>Chat</h3>
+                <p>Chat with an admin</p>
+            </a>
+
+            {% if current_user.role == "vendor" %}
+                <a href="/vendor/dashboard" class="account-card">
+                    <h3>My Shop</h3>
+                    <p>Edit your shop</p>
+                    </a>
+            {% endif %}
+
+            <a href="/logout" class="account-card logout">Logout</a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
