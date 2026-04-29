@@ -220,3 +220,5 @@ INSERT INTO chat_messages (sender_id, receiver_id, message, image_url) VALUES
 (2, 4, 'Yes, it is available!', NULL),
 (5, 3, 'When will my order ship?', NULL),
 (3, 5, 'It ships tomorrow.', NULL);
+
+select * from cart_items;
