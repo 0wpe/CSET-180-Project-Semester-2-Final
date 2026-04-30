@@ -1,7 +1,17 @@
 <style>
+    #cart{
+        /* margin-top:350px; */
+    }
+
+    .auth-container2 {
+    height: calc(100vh - var(--topbar-height)); /* subtract top bar height */
+    display: flex;
+    }
+
     .content_container{
         display:flex;
         flex-direction:column;
+        width:100%;
     }
 
     .info{
@@ -9,6 +19,7 @@
         flex-direction:row;
         justify-content:space-between;
         gap:10px;
+        min-width:100%;
     }
 
     .remove_btn{
@@ -21,6 +32,52 @@
         overflow:scroll;
     }
 
+    .quantity_input{
+        width:50px;
+        height:20px;
+    }
+
+    .remove_btn{
+        width:30px;
+        height:30px;
+        justify-content:center;
+        align-items: center;
+
+    }
+
+    .price_tag{
+        width:140px;
+    } 
+    
+    @media (max-width: 500px){
+        .auth-container2 {
+            justify-content: center;
+            align-items: center;
+            background: #f4f4f4;
+        }
+        .title{
+            width:fit-content;
+            margin:0 auto 20px auto;
+        }
+        .info{
+            flex-direction:column;
+        }
+        .info p{
+            width:fit-content;
+            margin:0 auto;
+        }
+        
+        .info form{
+            width:fit-content;
+            margin:0 auto;
+        }
+        .info form button{
+            min-width:150px;
+        }
+        #cart{
+            margin-top:750px;
+        }
+    }
 </style>
 {% extends "base.html" %}
 
@@ -28,7 +85,7 @@
 
 {% block content %}
     <div class="scroll_overflow auth-container">
-        <div id="cart" class="cart auth-form" style="padding-top:350px;">
+        <div id="cart" class="cart auth-form">
             <h2>Cart</h2>
             {% if cart_items %}
                 {% for item in cart_items %}
@@ -50,14 +107,14 @@
                                 <p>Quantity:</p>
                                 <form action="/update_cart_quantity" method="post">
                                     <input type="hidden" name="id" value="{{ item.cart_item_id }}">
-                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.stock }}" onchange="this.form.submit()">
+                                    <input type="number" name="quantity" class="quantity_input" value="{{ item.quantity }}" min="1" max="{{ item.stock }}" onchange="this.form.submit()">
                                 </form>
 
-                                <p>Price: ${{ item.price * item.quantity}}</p>
+                                <p class="price_tag">Price: ${{ item.price * item.quantity}}</p>
 
                                 <form action="/remove_cart_item" class="remove_btn" method="post">
                                     <input type="hidden" name="id" value="{{ item.cart_item_id }}">
-                                    <button type="submit">×</button>
+                                    <button class="remove_btn" type="submit"><div class="x">×</div></button>
                                 </form>
 
                             </div>
