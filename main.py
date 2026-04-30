@@ -294,16 +294,46 @@ def account():
 @app.route("/orders")
 def orders():
     user = get_current_user()
+
     if not user:
         return redirect(url_for("login"))
 
     orders = conn.execute(text("""
-        SELECT * FROM orders
-        WHERE user_id = :id
-        ORDER BY order_date DESC
+        SELECT 
+            o.*,
+            COALESCE(SUM(oi.quantity * oi.price_at_purchase), 0) AS total_price,
+            COALESCE(SUM(oi.quantity), 0) AS total_items
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        WHERE o.user_id = :id
+        GROUP BY o.id
+        ORDER BY o.order_date DESC
     """), {"id": user.id}).fetchall()
 
-    return render_template("orders.html", orders=orders)
+    order_items_map = {}
+
+    for order in orders:
+        items = conn.execute(text("""
+            SELECT 
+                oi.*,
+                p.title,
+                u.username,
+                v.shop_name
+            FROM order_items oi
+            JOIN product_variants pv ON oi.product_variant_id = pv.id
+            JOIN products p ON pv.product_id = p.id
+            JOIN users u ON oi.vendor_id = u.id
+            LEFT JOIN vendors v ON u.id = v.user_id
+            WHERE oi.order_id = :order_id
+        """), {"order_id": order.id}).fetchall()
+
+        order_items_map[order.id] = items
+
+    return render_template(
+        "orders.html",
+        orders=orders,
+        order_items_map=order_items_map
+    )
 
 
 

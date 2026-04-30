@@ -1,30 +1,227 @@
+<style>
+.order-container {
+    padding: 10px;
+}
+
+.order-inner {
+    max-width: 500px;
+    margin: auto;
+}
+
+/* Headings */
+.order-inner h2 {
+    margin-bottom: 15px;
+}
+
+.order-inner h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* Order Card */
+.order-card {
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.order-header h3 {
+    margin: 0;
+}
+
+.order-summary {
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+/* Status colors */
+.status.pending { color: orange; }
+.status.confirmed { color: yellow; }
+.status.shipped { color: purple; }
+.status.delivered { color: green; }
+
+.order-items {
+    border-top: 1px solid #333;
+    padding-top: 10px;
+}
+
+.order-items-header,
+.order-item-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 10px;
+    font-size: 0.9rem;
+}
+
+.order-items-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.order-item-row {
+    padding: 6px 0;
+    border-top: 1px solid #2a2a2a;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+    .order-items-header {
+        display: none;
+    }
+
+    .order-item-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .order-summary {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+
+/* Tablet */
+@media (min-width: 600px) {
+    .order-inner {
+        max-width: 650px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 900px) {
+    .order-inner {
+        max-width: 800px;
+    }
+
+    .order-card {
+        padding: 22px;
+        border: 1px solid #444;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        transition: 0.2s ease;
+    }
+}
+</style>
+
 {% extends "base.html" %}
 
 {% block title %}Order History{% endblock %}
 
 {% block content %}
-<h2>Current Orders</h2>
+<div class="order-container">
+    <div class="order-inner">
 
-{% for order in orders %}
-    {% if order.status != "delivered" %}
-        <div class="card">
-            <p>Order #{{ order.id }}</p>
-            <p>Placed on: {{ order.created_at }}</p>
-            <p>Status: {{ order.status }}</p>
-        </div>
-    {% endif %}
-{% endfor %}
+        <h2>Your Orders</h2>
 
-<h2>Past Orders</h2>
+        <!-- CURRENT ORDERS -->
+        <h3>Current Orders</h3>
+        {% for order in orders %}
+            {% if order.status != "shipped" %}
+                <div class="order-card">
 
-{% for order in orders %}
-    {% if order.status == "delivered" %}
-        <div class="card">
-            <p>Order #{{ order.id }}</p>
-            <p>Placed on: {{ order.created_at }}</p>
-            <p>Completed</p>
-        </div>
-    {% endif %}
-{% endfor %}
+                    <!-- Header -->
+                    <div class="order-header">
+                        <h3>Order #{{ order.id }}</h3>
+                        <span>{{ order.order_date }}</span>
+                    </div>
 
+                    <!-- Summary -->
+                    <div class="order-summary">
+                        <p>Items: {{ order.total_items }}</p>
+                        <p>Total: ${{ "%.2f"|format(order.total_price) }} ***Placeholder Price***</p>
+                        <p class="status {{ order.status }}">
+                            {{ order.status.capitalize() }}
+                        </p>
+                    </div>
+
+                    <!-- Items -->
+                    <div class="order-items">
+
+                        <div class="order-items-header">
+                            <span>Item</span>
+                            <span>Vendor</span>
+                            <span>Price</span>
+                            <span>Qty</span>
+                        </div>
+
+                        {% for item in order_items_map[order.id] %}
+                            <div class="order-item-row">
+                                <span>{{ item.title }}</span>
+                                <span>
+                                    {% if item.shop_name %}
+                                        {{ item.shop_name }}
+                                    {% else %}
+                                        {{ item.username }}
+                                    {% endif %}
+                                </span>
+                                <span>${{ item.price_at_purchase }}</span>
+                                <span>{{ item.quantity }}</span>
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <!-- PAST ORDERS -->
+        <h3>Past Orders</h3>
+        {% for order in orders %}
+            {% if order.status == "shipped" %}
+                <div class="order-card">
+
+                    <div class="order-header">
+                        <h3>Order #{{ order.id }}</h3>
+                        <span>{{ order.order_date }}</span>
+                    </div>
+
+                    <div class="order-summary">
+                        <p>Items: {{ order.total_items }}</p>
+                        <p>Total: ${{ "%.2f"|format(order.total_price) }} ***Placeholder Price***</p>
+                        <p class="status delivered">Completed</p>
+                    </div>
+
+                    <div class="order-items">
+
+                        <div class="order-items-header">
+                            <span>Item</span>
+                            <span>Vendor</span>
+                            <span>Price</span>
+                            <span>Qty</span>
+                        </div>
+
+                        {% for item in order_items_map[order.id] %}
+                            <div class="order-item-row">
+                                <span>{{ item.title }}</span>
+                                <span>
+                                    {% if item.shop_name %}
+                                        {{ item.shop_name }}
+                                    {% else %}
+                                        {{ item.username }}
+                                    {% endif %}
+                                </span>
+                                <span>${{ item.price_at_purchase }}</span>
+                                <span>{{ item.quantity }}</span>
+                            </div>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+            {% endif %}
+        {% endfor %}
+
+    </div>
+</div>
 {% endblock %}

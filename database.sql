@@ -223,5 +223,13 @@ INSERT INTO chat_messages (sender_id, receiver_id, message, image_url) VALUES
 
 select * from cart_items;
 
-ALTER TABLE orders
-ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- add these 2 lines to give shop names to vendors,
+-- the python will also default to the vendor username if shop_name = null
+ALTER TABLE vendors
+ADD COLUMN shop_name VARCHAR(255);
+
+UPDATE vendors
+SET shop_name = "Victor's Laptop Emporium"
+WHERE user_id = 3;
+SELECT * FROM vendors;

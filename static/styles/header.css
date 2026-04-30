@@ -42,7 +42,8 @@ body {
     left: 15px;
     font-size: 24px;
     cursor: pointer;
-    color: var(--accent-color)
+    color: var(--accent-color);
+    text-align:center;
 }
 
 /* Sidebar */

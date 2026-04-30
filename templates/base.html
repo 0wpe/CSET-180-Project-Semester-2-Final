@@ -39,14 +39,14 @@
             </form>
 
             <div>
-                <a href="/account"><img src="{{ url_for('static', filename='images/icons/account.svg') }}" class="NavIcons" alt="account img"></a> <!-- Account -->
-                <a href="/cart"><img src="{{ url_for('static', filename='images/icons/cart.svg') }}" class="NavIcons" alt="cart img"></a> <!-- Cart -->
+                <a href="/account"><img src="{{ url_for('static', filename='images/icons/account.svg') }}" class="NavIcons" alt="account"></a> <!-- Account -->
+                <a href="/cart"><img src="{{ url_for('static', filename='images/icons/cart.svg') }}" class="NavIcons" alt="cart"></a> <!-- Cart -->
 
 
             {% if session.get("user_id") %}
-                <a href="/logout"><img src="{{ url_for('static', filename='images/icons/logout.svg') }}" class="NavIcons" alt="logout img"></a> <!-- Logout -->
+                <a href="/logout"><img src="{{ url_for('static', filename='images/icons/logout.svg') }}" class="NavIcons" alt="logout"></a> <!-- Logout -->
             {% else %}
-                <a href="/login" id="NavLogin">Login</a> <!-- Login -->
+                <a href="/login" id="NavLogin"><img src="{{ url_for('static', filename='images/icons/login.svg') }}" class="NavIcons" alt="login"></a> <!-- Login -->
             {% endif %}
             </div>
         </nav>
