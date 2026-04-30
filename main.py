@@ -300,7 +300,7 @@ def orders():
     orders = conn.execute(text("""
         SELECT * FROM orders
         WHERE user_id = :id
-        ORDER BY created_at DESC
+        ORDER BY order_date DESC
     """), {"id": user.id}).fetchall()
 
     return render_template("orders.html", orders=orders)
