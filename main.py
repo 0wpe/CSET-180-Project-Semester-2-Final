@@ -290,7 +290,20 @@ def account():
 
     return render_template("account.html", user=user)
 
+#Orders page
+@app.route("/orders")
+def orders():
+    user = get_current_user()
+    if not user:
+        return redirect(url_for("login"))
 
+    orders = conn.execute(text("""
+        SELECT * FROM orders
+        WHERE user_id = :id
+        ORDER BY created_at DESC
+    """), {"id": user.id}).fetchall()
+
+    return render_template("orders.html", orders=orders)
 
 
 

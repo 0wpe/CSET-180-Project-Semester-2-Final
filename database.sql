@@ -222,3 +222,6 @@ INSERT INTO chat_messages (sender_id, receiver_id, message, image_url) VALUES
 (3, 5, 'It ships tomorrow.', NULL);
 
 select * from cart_items;
+
+ALTER TABLE orders
+ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;

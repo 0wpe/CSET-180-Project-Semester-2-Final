@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Order History{% endblock %}
+
+{% block content %}
+<h2>Current Orders</h2>
+
+{% for order in orders %}
+    {% if order.status != "delivered" %}
+        <div class="card">
+            <p>Order #{{ order.id }}</p>
+            <p>Placed on: {{ order.created_at }}</p>
+            <p>Status: {{ order.status }}</p>
+        </div>
+    {% endif %}
+{% endfor %}
+
+<h2>Past Orders</h2>
+
+{% for order in orders %}
+    {% if order.status == "delivered" %}
+        <div class="card">
+            <p>Order #{{ order.id }}</p>
+            <p>Placed on: {{ order.created_at }}</p>
+            <p>Completed</p>
+        </div>
+    {% endif %}
+{% endfor %}
+
+{% endblock %}
