@@ -17,14 +17,18 @@
         justify-content:end
     }
 
+    .scroll_overflow{
+        overflow:scroll;
+    }
+
 </style>
 {% extends "base.html" %}
 
 {% block title %}Cart{% endblock %}
 
 {% block content %}
-    <div class="auth-container">
-        <div id="cart" class="cart auth-form">
+    <div class="scroll_overflow auth-container">
+        <div id="cart" class="cart auth-form" style="padding-top:350px;">
             <h2>Cart</h2>
             {% if cart_items %}
                 {% for item in cart_items %}
