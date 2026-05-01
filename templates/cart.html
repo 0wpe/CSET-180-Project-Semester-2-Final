@@ -57,11 +57,12 @@
 
     .checkout_btn{
         background-color:var(--accent-color) !important;
-        transition:transform ease 30s;
+        transition:ease .3s;
     }
 
     .checkout_btn:hover{
-        transform: translate(200px,-160px) rotate(60090deg) scale(5);
+        transform: scale(1.05);
+        box-shadow: 5px 5px 10px rgb(150,150,150);
     }
 
     @media (max-width: 500px){
@@ -144,7 +145,7 @@
                     <h3>Total ${{ total }}</h3>
                     <form action="/checkout" method="post">
                         <input type="hidden" name="id" value="{{ user_id }}">
-                        <button class="checkout_btn" type="submit">Purchase</button>
+                        <button class="checkout_btn" type="submit">Checkout</button>
                     </form>
                 </div>
             {% else %}

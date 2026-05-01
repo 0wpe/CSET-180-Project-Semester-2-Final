@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from sqlalchemy import create_engine, text
 from werkzeug.security import generate_password_hash, check_password_hash
 from decimal import Decimal
+import random
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
@@ -195,13 +196,11 @@ def cart():
         JOIN products p ON pv.product_id = p.id
         WHERE ci.cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
         """), {"user_id": user_id}).fetchall()
-    print("cart items:",cart_items)
     subtotal = cart_Total(user_id)
     tax = subtotal*Decimal("0.06")
     total = f"{subtotal+tax:.2f}"
     subtotal = f"{subtotal:.2f}"
     tax = f"{tax:.2f}"
-    user_id=session["user_id"]
     return render_template("cart.html",cart_items=cart_items,subtotal=subtotal,tax=tax,total=total,user_id=user_id)
 
 @app.route("/update_cart_quantity", methods=['POST'])
@@ -286,6 +285,29 @@ def add_to_cart():
     conn.commit()
 
     return redirect(request.referrer)
+
+@app.route("/checkout", methods=["POST"])
+def checkout():
+    user_id=request.form['id']
+    cart_items = conn.execute(text("""
+        SELECT ci.id AS cart_item_id,
+        ci.quantity,
+        pv.*,
+        p.*
+        FROM cart_items ci
+        JOIN product_variants pv ON ci.product_variant_id = pv.id
+        JOIN products p ON pv.product_id = p.id
+        WHERE ci.cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
+        """), {"user_id": user_id}).fetchall()
+    subtotal = cart_Total(user_id)
+    shipping = subtotal*random.randrange(1,150)*Decimal("0.01")
+    tax = (shipping+subtotal)*Decimal("0.06")
+    total = f"{shipping+subtotal+tax:.2f}"
+    subtotal = f"{subtotal:.2f}"
+    shipping = f"{shipping:.2f}"
+
+    tax = f"{tax:.2f}"
+    return render_template("checkout.html",cart_items=cart_items,subtotal=subtotal,tax=tax,total=total,shipping=shipping,user_id=user_id)
 
 #Account page
 @app.route("/account")
