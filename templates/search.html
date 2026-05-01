@@ -21,12 +21,12 @@
             <div class="card-info">
                 <a href="/search/{{ product.id }}" class="card-link">
                     <h2>{{ product.title }}</h2>
-                    <p>{{ product.description }}</p>
-                    <p>{{ product.vendor_id }}</p>
-                    <p>{{ product.warranty_period }}</p>
-                    <p>${{ product.price }}</p>
-                    <p>{{ product.inventory }}</p>
                 </a>
+                <p>{{ product.description }}</p>
+                <p>{{ product.vendor_id }}</p>
+                <p>{{ product.warranty_period }}</p>
+                <p class="price">${{ product.price }}</p>
+                <p>{{ product.inventory }}</p>
 
                 <form action="/add_to_cart" method="POST">
                     <input type="hidden" name="product_variant_id" value="{{ product.variant_id }}">

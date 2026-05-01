@@ -42,7 +42,7 @@
 @media (min-width: 768px) {
     .auth-container {
         justify-content: center;
-        /* align-items: center; */
+        align-items: center;
         background: #f4f4f4;
     }
 

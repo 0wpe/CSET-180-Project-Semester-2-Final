@@ -233,3 +233,9 @@ UPDATE vendors
 SET shop_name = "Victor's Laptop Emporium"
 WHERE user_id = 3;
 SELECT * FROM vendors;
+
+use ecommerce;
+
+ALTER TABLE products
+ADD COLUMN is_sponsored BOOLEAN DEFAULT 0,
+ADD COLUMN is_package BOOLEAN DEFAULT 0;

@@ -39,21 +39,33 @@ def inject_user():
 @app.route("/")
 def home():
 
-    products = conn.execute(text("""
-    SELECT * FROM products
-    """)).fetchall()
-
     sponsored = conn.execute(text("""
-    SELECT * FROM products
-    LIMIT 3
+        SELECT p.*, pi.image_url
+        FROM products p
+        LEFT JOIN product_images pi ON p.id = pi.product_id
+        WHERE p.is_sponsored = 1
     """)).fetchall()
 
     discounted = conn.execute(text("""
-    SELECT p.* FROM products p
-    JOIN discounts d ON p.id = d.product_id
+        SELECT p.*, pi.image_url, d.new_price
+        FROM products p
+        JOIN discounts d ON p.id = d.product_id
+        LEFT JOIN product_images pi ON p.id = pi.product_id
     """)).fetchall()
 
-    return render_template("index.html", products=products, sponsored=sponsored, discounted=discounted)
+    packages = conn.execute(text("""
+        SELECT p.*, pi.image_url
+        FROM products p
+        LEFT JOIN product_images pi ON p.id = pi.product_id
+        WHERE p.is_package = 1
+    """)).fetchall()
+
+    return render_template(
+        "index.html",
+        sponsored=sponsored,
+        discounted=discounted,
+        packages=packages
+    )
 
 @app.route("/search")
 def search():
@@ -373,9 +385,80 @@ def orders():
 
 
 
+# VENDOR STUFF
+@app.route("/vendor/create-product", methods=["GET", "POST"])
+def create_product():
+    user = get_current_user()
 
+    if not user or user.role != "vendor":
+        return redirect(url_for("home"))
 
+    if request.method == "POST":
+        vendor = conn.execute(text("""
+        SELECT id FROM vendors WHERE user_id = :uid
+        """), {"uid":user.id}).fetchone()
 
+        if not vendor:
+            return "Vendor profile not found"
+
+        vendor_id = vendor.id
+
+        # Product Data Being Added
+        title = request.form["title"]
+        description = request.form["description"]
+        price = float(request.form["price"])
+        warranty = int(request.form.get("warranty_period", 0))
+        inventory = int(request.form.get("inventory", 0))
+
+        result = conn.execute(text("""
+        INSERT INTO products (title, description, vendor_id, warranty_period, price, inventory)
+        VALUES (:title, :description, vendor_id, :warranty_period, :price, :inventory)
+        """), {
+            "title":title,
+            "description":description,
+            "vendor_id":vendor_id,
+            "warranty_period":warranty,
+            "price":price,
+            "inventory":inventory
+        })
+
+        conn.commit()
+
+        # Getting Product Id
+        product_id = result.lastrowid
+
+        # Image
+        image_url = request.form.get("image_url")
+
+        if image_url:
+            conn.execute(text("""
+            INSERT INTO products_images (product_id, image_url)
+            VALUES (:product_id, :image_url)
+            """), {
+                "product_id":product_id,
+                "image_url":image_url
+            })
+
+            # Variant
+            color = request.form.get("color")
+            size = request.form.get("size")
+
+            if color or size:
+                conn.execute(text("""
+                INSERT INTO product_variants (product_id, color, size,stock)
+                VALUES (:product_id, :color, :size, :stock)
+                """), {
+                    "product_id":product_id,
+                    "color":color,
+                    "size":size,
+                    "stock":size
+                })
+
+            conn.commit()
+
+            return redirect("/account")
+
+    return render_template("create_product.html")
 
 
 

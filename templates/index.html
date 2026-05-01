@@ -1,29 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}Coffins R Us{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block content %}
 
-    <h2>Sponsored</h2>
-    <div class="products-page">
-        {% for product in sponsored %}
-            <div class="card sponsored">
-                <h2>{{ product.title }}</h2>
-                <p>{{ product.description }}</p>
-                <p>${{ product.price }}</p>
-            </div>
-        {% endfor %}
-    </div>
+<h2>Sponsored</h2>
+<div class="products-grid">
+    {% for product in sponsored %}
+        <a href="/search/{{ product.id }}" class="product-card">
+            <img src="{{ product.image_url }}" />
+            <h3>{{ product.title }}</h3>
+            <p>${{ product.price }}</p>
+        </a>
+    {% endfor %}
+</div>
 
-    <h2>Discounted Items</h2>
-    <div class="products-page">
-        {% for product in discounted %}
-            <div class="card discount">
-                <h2>{{ product.title }}</h2>
-                <p>{{ product.description }}</p>
-                <p>${{ product.price }}</p>
-            </div>
-        {% endfor %}
-    </div>
+<h2>Discounted Deals</h2>
+<div class="products-grid">
+    {% for product in discounted %}
+        <a href="/search/{{ product.id }}" class="product-card discount">
+            <img src="{{ product.image_url }}" />
+            <h3>{{ product.title }}</h3>
+            <p><del>${{ product.price }}</del> ${{ product.new_price }}</p>
+        </a>
+    {% endfor %}
+</div>
+
+<h2>Package Deals</h2>
+<div class="products-grid">
+    {% for product in packages %}
+        <a href="/search/{{ product.id }}" class="product-card package">
+            <img src="{{ product.image_url }}" />
+            <h3>{{ product.title }}</h3>
+            <p>${{ product.price }}</p>
+        </a>
+    {% endfor %}
+</div>
 
 {% endblock %}
