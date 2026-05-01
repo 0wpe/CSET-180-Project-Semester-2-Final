@@ -45,10 +45,11 @@
 }
 
 /* Status colors */
-.status.pending { color: orange; }
-.status.confirmed { color: yellow; }
-.status.shipped { color: purple; }
-.status.delivered { color: green; }
+.status.pending             { color: orange;}
+.status.confirmed           { color: yellow;}
+.status.handed_to_delivery  { color: lightgreen;}
+.status.shipped             { color: green;}
+.status.cancelled           { color: red;}
 
 .order-items {
     border-top: 1px solid #333;
@@ -71,6 +72,20 @@
 .order-item-row {
     padding: 6px 0;
     border-top: 1px solid #2a2a2a;
+}
+
+.cancel-btn {
+    margin: 0px 0 10px 0;
+    padding: 8px 12px;
+    background: #b00020;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.cancel-btn:hover {
+    background: #d32f2f;
 }
 
 /* Mobile adjustments */
@@ -126,7 +141,7 @@
         <!-- CURRENT ORDERS -->
         <h3>Current Orders</h3>
         {% for order in orders %}
-            {% if order.status != "shipped" %}
+            {% if order.status in ["pending", "confirmed", "handed_to_delivery"] %}
                 <div class="order-card">
 
                     <!-- Header -->
@@ -140,9 +155,24 @@
                         <p>Items: {{ order.total_items }}</p>
                         <p>Total: ${{ "%.2f"|format(order.total_price) }} ***Placeholder Price***</p>
                         <p class="status {{ order.status }}">
-                            {{ order.status.capitalize() }}
+                            {% if order.status == "handed_to_delivery" %}
+                                Order has Shipped
+                            {% else %}
+                                {{ order.status.capitalize() }}
+                            {% endif %}
                         </p>
                     </div>
+
+                    <!-- Cancel order Button-->
+                    {% if order.status in ["pending", "confirmed"] %}
+                        <form method="POST" action="/cancel_order">
+                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                            <button class="cancel-btn"
+                                onclick="return confirm('Are you sure you want to cancel this order?')">
+                                Cancel Order
+                            </button>
+                        </form>
+                    {% endif %}
 
                     <!-- Items -->
                     <div class="order-items">
@@ -178,7 +208,7 @@
         <!-- PAST ORDERS -->
         <h3>Past Orders</h3>
         {% for order in orders %}
-            {% if order.status == "shipped" %}
+            {% if order.status not in ["pending", "confirmed", "handed_to_delivery"] %}
                 <div class="order-card">
 
                     <div class="order-header">
@@ -189,7 +219,15 @@
                     <div class="order-summary">
                         <p>Items: {{ order.total_items }}</p>
                         <p>Total: ${{ "%.2f"|format(order.total_price) }} ***Placeholder Price***</p>
-                        <p class="status delivered">Completed</p>
+                        <p class="status {{ order.status }}">
+                            {% if order.status == "shipped" %}
+                                Completed
+                            {% elif order.status == "cancelled" %}
+                                Cancelled
+                            {% else %}
+                                {{ order.status.capitalize() }}
+                            {% endif %}
+                        </p>
                     </div>
 
                     <div class="order-items">

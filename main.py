@@ -362,8 +362,8 @@ def orders():
             FROM order_items oi
             JOIN product_variants pv ON oi.product_variant_id = pv.id
             JOIN products p ON pv.product_id = p.id
-            JOIN users u ON oi.vendor_id = u.id
-            LEFT JOIN vendors v ON u.id = v.user_id
+            JOIN vendors v ON oi.vendor_id = v.id
+            JOIN users u ON v.user_id = u.id
             WHERE oi.order_id = :order_id
         """), {"order_id": order.id}).fetchall()
 
@@ -375,6 +375,31 @@ def orders():
         order_items_map=order_items_map
     )
 
+#cancel order
+@app.route("/cancel_order", methods=["POST"])
+def cancel_order():
+    user = get_current_user()
+
+    if not user:
+        return redirect(url_for("login"))
+
+    order_id = request.form["order_id"]
+
+    # Only allow cancel if owned by user AND status is valid
+    conn.execute(text("""
+        UPDATE orders
+        SET status = 'cancelled'
+        WHERE id = :order_id
+        AND user_id = :user_id
+        AND status IN ('pending', 'confirmed')
+    """), {
+        "order_id": order_id,
+        "user_id": user.id
+    })
+
+    conn.commit()
+
+    return redirect(url_for("orders"))
 
 
 

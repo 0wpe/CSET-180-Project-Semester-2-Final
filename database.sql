@@ -239,3 +239,13 @@ use ecommerce;
 ALTER TABLE products
 ADD COLUMN is_sponsored BOOLEAN DEFAULT 0,
 ADD COLUMN is_package BOOLEAN DEFAULT 0;
+
+-- Add this to be able to cancel orders.
+ALTER TABLE orders
+MODIFY status ENUM(
+    'pending',
+    'confirmed',
+    'handed_to_delivery',
+    'shipped',
+    'cancelled'
+);
