@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from sqlalchemy import create_engine, text
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from decimal import Decimal
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
@@ -196,7 +196,13 @@ def cart():
         WHERE ci.cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
         """), {"user_id": user_id}).fetchall()
     print("cart items:",cart_items)
-    return render_template("cart.html",cart_items=cart_items,cart_Total=cart_Total(user_id))
+    subtotal = cart_Total(user_id)
+    tax = subtotal*Decimal("0.06")
+    total = f"{subtotal+tax:.2f}"
+    subtotal = f"{subtotal:.2f}"
+    tax = f"{tax:.2f}"
+    user_id=session["user_id"]
+    return render_template("cart.html",cart_items=cart_items,subtotal=subtotal,tax=tax,total=total,user_id=user_id)
 
 @app.route("/update_cart_quantity", methods=['POST'])
 def update_cart_quantity():
