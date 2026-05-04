@@ -37,7 +37,7 @@
     font-size: 0.9rem;
     color: #aaa;
 }
-/* HOVER (works on desktop, harmless on mobile) */
+/* HOVER */
 .account-card:hover {
     background: #2d2d2d;
 }
@@ -53,7 +53,7 @@
     }
 }
 
-/* DESKTOP — THIS IS WHERE IT FEELS LIKE CARDS */
+/* DESKTOP */
 @media (min-width: 900px) {
     .account-inner {
         max-width: 800px;
@@ -66,8 +66,6 @@
     .account-card {
         padding: 28px;
         text-align: left;
-
-        /* 👇 key “card” styling */
         background: #1e1e1e;
         border: 1px solid #333;
         box-shadow: 0 8px 20px rgba(0,0,0,0.25);
@@ -100,8 +98,8 @@
                 <h3>Inbox</h3>
                 <p>Open your inbox</p>
             </a>
-            <a href="/chat" class="account-card">
-                <h3>Chat</h3>
+            <a href="/chat/{{ admin.id }}" class="account-card">
+                <h3>Contact Support</h3>
                 <p>Chat with an admin</p>
             </a>
 
