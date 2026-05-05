@@ -4,6 +4,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from decimal import Decimal
 import random
 from datetime import datetime
+from werkzeug.utils import secure_filename
+import os
+import uuid
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -611,15 +614,30 @@ def send_message():
     user = get_current_user()
 
     receiver_id = request.form["receiver_id"]
-    message = request.form["message"]
+    message = request.form.get("message") or None
+    image = request.files.get("image")
+
+    image_url = None
+
+    if image and image.filename:
+        filename = f"{uuid.uuid4().hex}_{secure_filename(image.filename)}"
+
+        upload_folder = "static/uploads"
+        os.makedirs(upload_folder, exist_ok=True)
+
+        filepath = os.path.join(upload_folder, filename)
+        image.save(filepath)
+
+        image_url = f"/static/uploads/{filename}"
 
     conn.execute(text("""
-        INSERT INTO chat_messages (sender_id, receiver_id, message)
-        VALUES (:sender, :receiver, :message)
+        INSERT INTO chat_messages (sender_id, receiver_id, message, image_url)
+        VALUES (:sender, :receiver, :message, :image_url)
     """), {
         "sender": user.id,
         "receiver": receiver_id,
-        "message": message
+        "message": message,
+        "image_url": image_url
     })
 
     conn.commit()

@@ -14,13 +14,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 6px;
     padding: 12px;
     background: #1e1e1e;
     border-radius: 8px;
-    border-bottom: 1px solid #333;
+
     text-decoration: none;
     color: white;
+
     transition: 0.2s ease;
+
+    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .chat-row:hover {
@@ -31,6 +36,8 @@
 .chat-info {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
 }
 
 .chat-name {
@@ -43,8 +50,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 250px;
-}
-.chat-preview {
     font-size: 0.9rem;
     color: #aaa;
 }
