@@ -323,6 +323,42 @@ def checkout():
     tax = f"{tax:.2f}"
     return render_template("checkout.html",cart_items=cart_items,subtotal=subtotal,tax=tax,total=total,shipping=shipping,user_id=user_id)
 
+@app.route("/purchase", methods=["POST"])
+def purchase():
+    user_id= request.form['id']
+
+
+
+    items=conn.execute(text("""
+        SELECT * FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)    
+        """),{"user_id": user_id})
+
+    for i in items:
+        print("item","id",i[0],"cart_id",i[1],"product_varient_id",i[2],"quantity",i[3])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    conn.execute(text("""
+        DELETE FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)    
+        """),{"user_id": user_id})
+    conn.commit()
+
+    return render_template("index.html",thank=True)
+
+
 #Account page
 @app.route("/account")
 def account():

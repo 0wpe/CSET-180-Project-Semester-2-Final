@@ -1,12 +1,13 @@
 <style>
-    #cart{
-        /* margin-top:350px; */
-        
-    }
 
     .auth-container2 {
-    height: calc(100vh - var(--topbar-height)); /* subtract top bar height */
-    display: flex;
+        height: calc(100vh - var(--topbar-height)); /* subtract top bar height */
+        display: flex;
+    }
+
+    .cart{
+        overflow-x:hidden;
+        height:fit-content;
     }
 
     .content_container{
@@ -65,6 +66,32 @@
         box-shadow: 5px 5px 10px rgb(150,150,150);
     }
 
+    .checkout_form{
+        display:flex;
+        flex-direction:column;
+    }
+
+    .header_card{
+        display:flex;
+        flex-direction:column;
+    }
+
+    
+    .money_info{
+        justify-content: center;
+        align-items: center;
+        width:fit-content;
+        margin:0 auto;
+    }
+
+    .money_info h3{
+        width:fit-content;
+    }
+
+    #subtotals{
+        width:fit-content;
+    }
+
     @media (max-width: 500px){
         .auth-container2 {
             justify-content: center;
@@ -90,9 +117,6 @@
         .info form button{
             min-width:150px;
         }
-        #cart{
-            margin-top:750px;
-        }
     }
 </style>
 {% extends "base.html" %}
@@ -100,18 +124,20 @@
 {% block title %}Cart{% endblock %}
 
 {% block content %}
-    <div class="scroll_overflow auth-container">
+    <div class="scroll_overflow cart-container">
         <div id="cart" class="cart auth-form">
             <h2>Checkout</h2>
             {% if cart_items %}
-                <div class="card">
-                    <div id="subtotals">
-                        <h6>Subtotal ${{ subtotal }}</h6>
-                        <h6>Shipping ${{ shipping }}</h6>
-                        <h6>Tax ${{ tax }}</h6>
+                <div class="header_card card">
+                    <div class="money_info">
+                        <div id="subtotals">
+                            <h6>Subtotal ${{ subtotal }}</h6>
+                            <h6>Shipping ${{ shipping }}</h6>
+                            <h6>Tax ${{ tax }}</h6>
+                        </div>
+                        <h3>Total ${{ total }}</h3>
                     </div>
-                    <h3>Total ${{ total }}</h3>
-                    <form action="/purchase" method="post">
+                    <form action="/purchase" method="post" class="checkout_form">
                         <h3>Information</h3>
                         <input type="hidden" name="id" value="{{ user_id }}">
                         <label for="address">Address</label>

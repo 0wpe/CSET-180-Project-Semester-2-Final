@@ -1,8 +1,68 @@
+<style>
+    body.no-scroll {
+        overflow: hidden;
+    }
+
+    .thank_you{
+        z-index:10000;
+        border:1px black solid;
+        border-radius:5px;
+        width:fit-content;
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform: translate(-50%, -50%);
+        padding: 10px 16px;
+        background-color: white;
+    }
+
+    .thank_you_button{
+        width:fit-content;
+        margin:0px auto;
+    }
+
+    .filter{
+        z-index: 9999;
+        width:100vw;
+        height:100vh;
+        background-color: rgba(0,0,0,.75);
+    }
+
+
+</style>
+
+
+
 {% extends "base.html" %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
+
+{% if thank %}
+    <div class="filter">
+    </div>
+    <div class="thank_you">
+        <h2>Thank you for your purchase!</h2>
+        <div class="thank_you_button">
+            <button onclick="closeMessage()">Close</button>
+        </div>
+    </div>
+    <script>
+        // Disable scrolling when thank-you modal is shown
+        document.body.classList.add("no-scroll");
+    </script>
+{% endif %}
+
+<script>
+    function closeMessage(){
+        const filter=document.getElementsByClassName("filter")[0]
+        const message=document.getElementsByClassName("thank_you")[0]
+        filter.style.display="none";
+        message.style.display="none";
+        document.body.classList.remove("no-scroll");
+    }
+</script>
 
 <h2>Sponsored</h2>
 <div class="products-grid">
