@@ -1,7 +1,8 @@
 <style>
-    #cart{
-        /* margin-top:350px; */
-        
+
+    .cart{  
+        overflow-x:hidden;
+        height:fit-content;
     }
 
     .auth-container2 {
@@ -90,9 +91,6 @@
         .info form button{
             min-width:150px;
         }
-        #cart{
-            margin-top:750px;
-        }
     }
 </style>
 {% extends "base.html" %}
@@ -100,7 +98,7 @@
 {% block title %}Cart{% endblock %}
 
 {% block content %}
-    <div class="scroll_overflow auth-container">
+    <div class="scroll_overflow cart-container">
         <div id="cart" class="cart auth-form">
             <h2>Cart</h2>
             {% if cart_items %}

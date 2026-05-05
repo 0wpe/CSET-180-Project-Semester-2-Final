@@ -5,6 +5,8 @@ from decimal import Decimal
 import random
 import os
 from werkzeug.utils import secure_filename
+from datetime import datetime
+import uuid
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -300,13 +302,52 @@ def checkout():
 
     return render_template("checkout.html", cart_items=cart_items, subtotal=subtotal, tax=tax, total=total, shipping=shipping, user_id=user_id)
 
+@app.route("/purchase", methods=["POST"])
+def purchase():
+    user_id= request.form['id']
+
+
+
+    items=conn.execute(text("""
+        SELECT * FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)    
+        """),{"user_id": user_id})
+
+    for i in items:
+        print("item","id",i[0],"cart_id",i[1],"product_varient_id",i[2],"quantity",i[3])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    conn.execute(text("""
+        DELETE FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)    
+        """),{"user_id": user_id})
+    conn.commit()
+
+    return render_template("index.html",thank=True)
+
+
+#Account page
 @app.route("/account")
 def account():
     user = get_current_user()
     if not user:
         return redirect(url_for("login"))
-
-    return render_template("account.html", user=user)
+    admin = conn.execute(text("""
+        SELECT id FROM users WHERE role = 'admin' LIMIT 1
+    """)).fetchone()
+    return render_template("account.html", user=user, admin=admin)
 
 @app.route("/orders")
 def orders():
@@ -329,13 +370,18 @@ def orders():
 
     for order in orders:
         items = conn.execute(text("""
-        SELECT oi.*, p.title, u.username, v.shop_name
-        FROM order_items oi
-        JOIN product_variants pv ON oi.product_variant_id = pv.id
-        JOIN products p ON pv.product_id = p.id
-        JOIN vendors v ON oi.vendor_id = v.id
-        JOIN users u ON v.user_id = u.id
-        WHERE oi.order_id = :order_id
+            SELECT 
+                oi.*,
+                p.title,
+                u.username,
+                u.id AS vendor_user_id,
+                v.shop_name
+            FROM order_items oi
+            JOIN product_variants pv ON oi.product_variant_id = pv.id
+            JOIN products p ON pv.product_id = p.id
+            JOIN vendors v ON oi.vendor_id = v.id
+            JOIN users u ON v.user_id = u.id
+            WHERE oi.order_id = :order_id
         """), {"order_id": order.id}).fetchall()
 
         order_items_map[order.id] = items
@@ -435,7 +481,154 @@ def create_product():
 
             conn.commit()
 
-        return redirect(f"/vendor/product/{product_id}/variants")
+            return redirect("/account")
+
+    return render_template("create_product.html")
+
+#inbox
+@app.route("/inbox")
+def inbox():
+    user = get_current_user()
+
+    conversations = conn.execute(text("""
+        SELECT 
+            u.id,
+            u.username,
+            v.shop_name,
+            m.message,
+            m.created_at
+        FROM users u
+        JOIN (
+            SELECT 
+                CASE 
+                    WHEN sender_id = :user_id THEN receiver_id
+                    ELSE sender_id
+                END AS other_user_id,
+                MAX(created_at) as last_time
+            FROM chat_messages
+            WHERE sender_id = :user_id OR receiver_id = :user_id
+            GROUP BY other_user_id
+        ) latest ON u.id = latest.other_user_id
+        JOIN chat_messages m 
+            ON (
+                (m.sender_id = :user_id AND m.receiver_id = u.id)
+                OR
+                (m.sender_id = u.id AND m.receiver_id = :user_id)
+            )
+            AND m.created_at = latest.last_time
+        LEFT JOIN vendors v ON u.id = v.user_id
+        ORDER BY m.created_at DESC
+    """), {"user_id": user.id}).fetchall()
+
+    return render_template(
+        "inbox.html",
+        conversations=conversations,
+        now=datetime.now()
+    )
+
+#chat route
+@app.route("/chat/<int:user_id>")
+def chat(user_id):
+    current_user = get_current_user()
+
+    messages = conn.execute(text("""
+        SELECT *
+        FROM chat_messages
+        WHERE 
+            (sender_id = :me AND receiver_id = :them)
+            OR
+            (sender_id = :them AND receiver_id = :me)
+        ORDER BY created_at ASC
+    """), {
+        "me": current_user.id,
+        "them": user_id
+    }).fetchall()
+
+    other_user = conn.execute(text("""
+        SELECT 
+            u.username,
+            u.first_name,
+            u.last_name,
+            u.role,
+            v.shop_name
+        FROM users u
+        LEFT JOIN vendors v ON u.id = v.user_id
+        WHERE u.id = :id
+    """), {"id": user_id}).fetchone()
+
+    return render_template(
+        "chat.html",
+        messages=messages,
+        other_user_id=user_id,
+        other_user=other_user,
+        now=datetime.now()
+    )
+
+#send message
+@app.route("/send_message", methods=["POST"])
+def send_message():
+    user = get_current_user()
+
+    receiver_id = request.form["receiver_id"]
+    message = request.form.get("message") or None
+    image = request.files.get("image")
+
+    image_url = None
+
+    if image and image.filename:
+        filename = f"{uuid.uuid4().hex}_{secure_filename(image.filename)}"
+
+        upload_folder = "static/uploads"
+        os.makedirs(upload_folder, exist_ok=True)
+
+        filepath = os.path.join(upload_folder, filename)
+        image.save(filepath)
+
+        image_url = f"/static/uploads/{filename}"
+
+    conn.execute(text("""
+        INSERT INTO chat_messages (sender_id, receiver_id, message, image_url)
+        VALUES (:sender, :receiver, :message, :image_url)
+    """), {
+        "sender": user.id,
+        "receiver": receiver_id,
+        "message": message,
+        "image_url": image_url
+    })
+
+    conn.commit()
+
+    return redirect(f"/chat/{receiver_id}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     return render_template("vendor/create_product.html")
 

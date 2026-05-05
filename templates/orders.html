@@ -11,6 +11,8 @@
 /* Headings */
 .order-inner h2 {
     margin-bottom: 15px;
+    border-bottom: 1px solid black;
+    width: fit-content;
 }
 
 .order-inner h3 {
@@ -37,6 +39,27 @@
 
 .order-header h3 {
     margin: 0;
+}
+
+.order-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.contact-btn {
+    padding: 8px 12px;
+    background: #2a2a2a;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.contact-btn:hover {
+    background: #3a3a3a;
 }
 
 .order-summary {
@@ -86,6 +109,35 @@
 
 .cancel-btn:hover {
     background: #d32f2f;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 12px;
+    width: 300px;
+    color: white;
+}
+
+.modal-content button {
+    display: block;
+    margin: 15px auto 0 auto;
 }
 
 /* Mobile adjustments */
@@ -143,7 +195,18 @@
         {% for order in orders %}
             {% if order.status in ["pending", "confirmed", "handed_to_delivery"] %}
                 <div class="order-card">
+                    <script>
+                        window.orderVendors = window.orderVendors || {};
 
+                        window.orderVendors[{{ order.id }}] = [
+                            {% for item in order_items_map[order.id] %}
+                                {
+                                    "user_id": {{ item.vendor_user_id }},
+                                    "name": {{ (item.shop_name or item.username) | tojson }}
+                                }{% if not loop.last %},{% endif %}
+                            {% endfor %}
+                        ];
+                    </script>
                     <!-- Header -->
                     <div class="order-header">
                         <h3>Order #{{ order.id }}</h3>
@@ -163,16 +226,22 @@
                         </p>
                     </div>
 
-                    <!-- Cancel order Button-->
-                    {% if order.status in ["pending", "confirmed"] %}
-                        <form method="POST" action="/cancel_order">
-                            <input type="hidden" name="order_id" value="{{ order.id }}">
-                            <button class="cancel-btn"
-                                onclick="return confirm('Are you sure you want to cancel this order?')">
-                                Cancel Order
-                            </button>
-                        </form>
-                    {% endif %}
+                    <div class="order-actions">
+                        {% if order.status in ["pending", "confirmed"] %}
+                            <form method="POST" action="/cancel_order">
+                                <input type="hidden" name="order_id" value="{{ order.id }}">
+                                <button class="cancel-btn"
+                                    onclick="return confirm('Are you sure you want to cancel this order?')">
+                                    Cancel Order
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <button class="contact-btn" onclick="openVendorModal({{ order.id }})">
+                            Contact Vendor
+                        </button>
+
+                    </div>
 
                     <!-- Items -->
                     <div class="order-items">
@@ -210,6 +279,18 @@
         {% for order in orders %}
             {% if order.status not in ["pending", "confirmed", "handed_to_delivery"] %}
                 <div class="order-card">
+                <script>
+                    window.orderVendors = window.orderVendors || {};
+
+                    window.orderVendors[{{ order.id }}] = [
+                        {% for item in order_items_map[order.id] %}
+                            {
+                                "user_id": {{ item.vendor_user_id }},
+                                "name": {{ (item.shop_name or item.username) | tojson }}
+                            }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ];
+                </script>
 
                     <div class="order-header">
                         <h3>Order #{{ order.id }}</h3>
@@ -228,6 +309,12 @@
                                 {{ order.status.capitalize() }}
                             {% endif %}
                         </p>
+                    </div>
+
+                    <div class="order-actions">
+                        <button class="contact-btn" onclick="openVendorModal({{ order.id }})">
+                            Contact Vendor
+                        </button>
                     </div>
 
                     <div class="order-items">
@@ -262,4 +349,57 @@
 
     </div>
 </div>
+
+<!-- Vendor Modal -->
+<div id="vendorModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>Which vendor would you like to contact?</h3>
+        <div id="vendorList"></div>
+        <button onclick="closeVendorModal()">Close</button>
+    </div>
+</div>
+
+<script>
+function openVendorModal(orderId) {
+    const modal = document.getElementById("vendorModal");
+    const list = document.getElementById("vendorList");
+
+    list.innerHTML = "";
+
+    const vendors = window.orderVendors[orderId];
+
+    const unique = {};
+    vendors.forEach(v => unique[v.user_id] = v);
+
+    const vendorList = Object.values(unique);
+
+    // Skips modal if only one vendor
+    if (vendorList.length === 1) {
+        window.location.href = `/chat/${vendorList[0].user_id}`;
+        return;
+    }
+
+    vendorList.forEach(vendor => {
+        const btn = document.createElement("button");
+        btn.innerText = vendor.name;
+
+        btn.style.display = "block";
+        btn.style.margin = "8px 0";
+        btn.style.width = "100%";
+
+        btn.onclick = () => {
+            window.location.href = `/chat/${vendor.user_id}`;
+        };
+
+        list.appendChild(btn);
+    });
+
+    modal.classList.remove("hidden");
+}
+
+function closeVendorModal() {
+    document.getElementById("vendorModal").classList.add("hidden");
+}
+</script>
+
 {% endblock %}

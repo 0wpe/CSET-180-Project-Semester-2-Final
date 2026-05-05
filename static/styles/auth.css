@@ -4,6 +4,11 @@
     display: flex;
 }
 
+.cart-container {
+    height: calc(100vh - var(--topbar-height)); /* subtract top bar height */
+    display: flex;
+}
+
 .auth-form {
     width: 100%;
     padding: 2rem;
@@ -43,6 +48,12 @@
     .auth-container {
         justify-content: center;
         align-items: center;
+        background: #f4f4f4;
+    }
+
+    .cart-container {
+        justify-content: center;
+        
         background: #f4f4f4;
     }
 

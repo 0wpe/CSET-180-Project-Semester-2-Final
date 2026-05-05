@@ -1,31 +1,100 @@
+<style>
+    .inbox-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 10px;
+}
+
+.inbox-container h2 {
+    margin-bottom: 15px;
+}
+
+/* Chat row */
+.chat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    padding: 12px;
+    background: #1e1e1e;
+    border-radius: 8px;
+
+    text-decoration: none;
+    color: white;
+
+    transition: 0.2s ease;
+
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.chat-row:hover {
+    background: #2a2a2a;
+}
+
+/* Left side */
+.chat-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-name {
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+
+.chat-preview {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 250px;
+    font-size: 0.9rem;
+    color: #aaa;
+}
+.chat-row.unread {
+    font-weight: bold;
+}
+/* Right side */
+.chat-meta {
+    font-size: 0.8rem;
+    color: #777;
+}
+</style>
 {% extends "base.html" %}
 
-{% block title %}Register{% endblock %}
-
 {% block content %}
-<div class="auth-container">
 
-    <form class="auth-form" method="POST">
+<div class="inbox-container">
+    <h2>Inbox</h2>
 
-        <h2>Register</h2>
+    {% for convo in conversations %}
+        <a href="/chat/{{ convo.id }}" class="chat-row">
 
-        <input type="text" name = "username" placeholder="Username" required>
-        <input type="text" name = "first_name" placeholder="First Name" required>
-        <input type="text" name = "last_name" placeholder="Last Name" required>
-        <input type="email" name = "email" placeholder="Email" required>
-        <input type="password" name = "password" placeholder="Password" required>
+            <div class="chat-info">
+                <div class="chat-name">
+                    {{ convo.shop_name or convo.username }}
+                </div>
 
-        <label>Type</label>
-        <select name="role" required>
-            <option value="customer">Customer</option>
-            <option value="vendor">Vendor</option>
-        </select>
+                <div class="chat-preview">
+                    {{ convo.message }}
+                </div>
+            </div>
 
-        <button type="submit">Register</button>
+            <div class="chat-meta">
+                {% if convo.created_at.date() == now.date() %}
+                    {{ convo.created_at.strftime("%I:%M %p") }}
+                {% elif (now.date() - convo.created_at.date()).days == 1 %}
+                    Yesterday
+                {% else %}
+                    {{ convo.created_at.strftime("%b %d") }}
+                {% endif %}
+            </div>
 
-        <p class="switch">
-            Have an account? <a href="/login">Login</a>
-        </p>
-    </form>
+        </a>
+    {% endfor %}
+
 </div>
+
 {% endblock %}
