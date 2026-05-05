@@ -1,0 +1,140 @@
+<style>
+.shop-container {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.shop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.shop-header a {
+    background: #3b82f6;
+    color: white;
+    padding: 10px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+/* MOBILE GRID */
+.products-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+/* Start Product Card */
+.product-card {
+    background: #1e1e1e;
+    border-bottom: 1px solid #333; /* mobile style like Amazon */
+    padding: 12px;
+}
+
+.product-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.product-card h3 {
+    margin: 8px 0 4px;
+}
+
+.product-card p {
+    color: #aaa;
+}
+/* End Product Card */
+
+/* Start Actions */
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.actions a,
+.actions button {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.actions a {
+    background: #444;
+    color: white;
+}
+
+.actions button {
+    background: #ef4444;
+    color: white;
+}
+/* End Actions */
+
+/* Start Desktop Media */
+@media (min-width: 900px) {
+    .shop-container {
+        max-width: 1000px;
+        margin: auto;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+    }
+
+    .product-card {
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 15px;
+    }
+
+    .product-card:hover {
+        transform: translateY(-4px);
+        transition: 0.2s;
+    }
+}
+/* End Desktop Media */
+</style>
+
+<div class="shop-container">
+
+    <div class="shop-header">
+        <h2>Your Shop</h2>
+        <a href="/vendor/create-product">+ Create Product</a>
+    </div>
+
+    <div class="products-grid">
+
+        {% for product in products %}
+        <div class="product-card">
+
+            <img src="{{ product.image_url }}">
+
+            <h3>{{ product.title }}</h3>
+            <p>${{ product.price }}</p>
+
+            <div class="actions">
+                <a href="/vendor/edit-product/{{ product.id }}">Edit</a>
+
+                <form action="/vendor/delete-product" method="POST">
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <button type="submit">Delete</button>
+                </form>
+
+                <a href="/vendor/add-discount/{{ product.id }}">Discount</a>
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>

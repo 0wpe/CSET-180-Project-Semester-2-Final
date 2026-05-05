@@ -1,0 +1,76 @@
+<style>
+.form-container {
+    width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+label {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #1e1e1e;
+    color: white;
+    width: 100%;
+}
+
+button {
+    padding: 12px;
+    background: #22c55e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+
+/* DESKTOP CENTER CARD */
+@media (min-width: 900px) {
+    .form-container {
+        max-width: 550px;
+        margin: auto;
+        background: #111;
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid #333;
+    }
+}
+</style>
+
+<div class="discount-container">
+
+    <h2>Add Discount</h2>
+
+    <form method="POST">
+
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+
+        <label>Product</label>
+        <p>{{ product.title }}</p>
+
+        <label>Original Price</label>
+        <input type="number" value="{{ product.price }}" readonly>
+
+        <label>New Price</label>
+        <input type="number" name="new_price" required>
+
+        <label>Start Time</label>
+        <input type="datetime-local" name="start_time">
+
+        <label>End Time</label>
+        <input type="datetime-local" name="end_time">
+
+        <button type="submit">Apply Discount</button>
+
+    </form>
+
+</div>

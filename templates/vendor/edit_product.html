@@ -1,0 +1,10 @@
+<form method="POST">
+    <input name="title" value="{{ product.title }}">
+    <textarea name="description">{{ product.description }}</textarea>
+
+    <input name="price" value="{{ product.price }}">
+    <input name="warranty_period" value="{{ product.warranty_period }}">
+    <input name="inventory" value="{{ product.inventory }}">
+
+    <button type="submit">Save</button>
+</form>
