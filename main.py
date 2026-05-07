@@ -85,9 +85,10 @@ def search():
         """),{"q":f"%{q}%"}).fetchall()
     else:
         products = conn.execute(text("""
-        SELECT p.*, pi.image_url
+        SELECT p.*, pi.image_url, pv.id AS variant_id
         FROM products p
         LEFT JOIN product_images pi ON p.id = pi.product_id
+        JOIN product_variants pv ON pv.product_id = p.id
         """)).fetchall()
 
     return render_template("search.html", products=products, query=q)

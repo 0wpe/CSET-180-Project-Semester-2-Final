@@ -249,3 +249,5 @@ MODIFY status ENUM(
     'shipped',
     'cancelled'
 );
+
+select * from orders;
