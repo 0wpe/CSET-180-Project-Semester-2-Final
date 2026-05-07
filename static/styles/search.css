@@ -134,8 +134,8 @@
 
     border: 1px solid #ccc;
     background: #f8f8f8;
-
-    cursor: pointer;
+    /* background: rgb(0,0,0); */
+    /* cursor: pointer; */
     font-size: 0.8rem;
 }
 
