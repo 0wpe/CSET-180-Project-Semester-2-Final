@@ -90,10 +90,18 @@
         <h2>Welcome, {{ current_user.first_name }}!</h2>
 
         <div class="account-grid">
-            <a href="/orders" class="account-card">
-                <h3>Track Orders</h3>
-                <p>View current orders and their status</p>
-            </a>
+            {% if current_user.role == "vendor" %}
+                <a href="/vendor/orders" class="account-card">
+                    <h3>Manage Orders</h3>
+                    <p>Approve, cancel, and ship customer orders</p>
+                </a>
+            {% else %}
+                <a href="/orders" class="account-card">
+                    <h3>Track Orders</h3>
+                    <p>View current orders and their status</p>
+                </a>
+            {% endif %}
+
             <a href="/inbox" class="account-card">
                 <h3>Inbox</h3>
                 <p>Open your inbox</p>
@@ -102,7 +110,12 @@
                 <h3>Contact Support</h3>
                 <p>Chat with an admin</p>
             </a>
-
+            {% if current_user.role == "customer" %}
+                <a href="/complaints" class="account-card">
+                    <h3>Complaints & Returns</h3>
+                    <p>Request refunds, returns, or warranty claims</p>
+                </a>
+            {% endif %}
             {% if current_user.role == "vendor" %}
                 <a href="/vendor/shop" class="account-card">
                     <h3>My Shop</h3>

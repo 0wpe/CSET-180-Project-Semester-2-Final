@@ -709,5 +709,125 @@ def add_discount(product_id):
 
     return render_template("vendor/discount.html", product=product)
 
+
+#vendor manage orders page
+@app.route("/vendor/orders")
+def vendor_orders():
+
+    user = get_current_user()
+
+    if not user or user.role != "vendor":
+        return redirect("/login")
+
+    # get vendor record
+    vendor = conn.execute(text("""
+        SELECT id
+        FROM vendors
+        WHERE user_id = :uid
+    """), {
+        "uid": user.id
+    }).fetchone()
+
+    if not vendor:
+        return redirect("/account")
+
+    # get orders containing this vendor's products
+    orders = conn.execute(text("""
+        SELECT DISTINCT
+            o.*,
+            u.first_name,
+            u.last_name,
+            u.username
+        FROM orders o
+        JOIN order_items oi ON o.id = oi.order_id
+        JOIN users u ON o.user_id = u.id
+        WHERE oi.vendor_id = :vendor_id
+        ORDER BY o.order_date DESC
+    """), {
+        "vendor_id": vendor.id
+    }).fetchall()
+
+    order_items_map = {}
+
+    for order in orders:
+
+        items = conn.execute(text("""
+            SELECT
+                oi.*,
+                p.title
+            FROM order_items oi
+            JOIN product_variants pv ON oi.product_variant_id = pv.id
+            JOIN products p ON pv.product_id = p.id
+            WHERE oi.order_id = :order_id
+            AND oi.vendor_id = :vendor_id
+        """), {
+            "order_id": order.id,
+            "vendor_id": vendor.id
+        }).fetchall()
+
+        order_items_map[order.id] = items
+
+    return render_template(
+        "vendor_orders.html",
+        orders=orders,
+        order_items_map=order_items_map
+    )
+
+#Approve Order
+@app.route("/vendor/approve_order", methods=["POST"])
+def approve_order():
+
+    order_id = request.form["order_id"]
+
+    conn.execute(text("""
+        UPDATE orders
+        SET status = 'confirmed'
+        WHERE id = :order_id
+    """), {
+        "order_id": order_id
+    })
+
+    conn.commit()
+
+    return redirect("/vendor/orders")
+
+#Cancel Order
+@app.route("/vendor/cancel_order", methods=["POST"])
+def vendor_cancel_order():
+
+    order_id = request.form["order_id"]
+
+    conn.execute(text("""
+        UPDATE orders
+        SET status = 'cancelled'
+        WHERE id = :order_id
+    """), {
+        "order_id": order_id
+    })
+
+    conn.commit()
+
+    return redirect("/vendor/orders")
+
+#Ship Order
+@app.route("/vendor/ship_order", methods=["POST"])
+def vendor_ship_order():
+
+    order_id = request.form["order_id"]
+
+    conn.execute(text("""
+        UPDATE orders
+        SET status = 'handed_to_delivery'
+        WHERE id = :order_id
+    """), {
+        "order_id": order_id
+    })
+
+    conn.commit()
+
+    return redirect("/vendor/orders")
+
+
+
 if __name__ == "__main__":
     app.run(debug=True)

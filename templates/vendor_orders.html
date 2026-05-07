@@ -1,0 +1,171 @@
+<style>
+.orders-inner {
+    max-width: 900px;
+    margin: auto;
+    padding: 15px;
+}
+
+.order-card {
+    background: #1e1e1e;
+    color: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.order-date {
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
+.status {
+    color: #7CFC00;
+}
+
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.order-table th,
+.order-table td {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    text-align: left;
+    color: white;
+}
+
+.order-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.approve-btn,
+.cancel-btn,
+.ship-btn,
+.message-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.approve-btn {
+    background: green;
+    color: white;
+}
+
+.cancel-btn {
+    background: crimson;
+    color: white;
+}
+
+.ship-btn {
+    background: royalblue;
+    color: white;
+}
+
+.message-btn {
+    background: #2a2a2a;
+    color: white;
+}
+</style>
+
+{% extends "base.html" %}
+
+{% block title %}Vendor Orders{% endblock %}
+
+{% block content %}
+
+<div class="orders-container">
+
+    <div class="orders-inner">
+
+        <h2>Manage Orders</h2>
+
+        {% for order in orders %}
+
+        <div class="order-card">
+
+            <div class="order-header">
+                <div>
+                    <h3>Order #{{ order.id }}</h3>
+
+                    <p>
+                        Customer:
+                        {{ order.first_name }} {{ order.last_name }}
+                    </p>
+
+                    <p>
+                        Status:
+                        {{ order.status.replace("_", " ").title() }}
+                    </p>
+                </div>
+
+                <div class="order-date">
+                    {{ order.order_date }}
+                </div>
+            </div>
+
+            <table class="order-table">
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                </tr>
+
+                {% for item in order_items_map[order.id] %}
+                <tr>
+                    <td>{{ item.title }}</td>
+                    <td>${{ item.price_at_purchase }}</td>
+                    <td>{{ item.quantity }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+            <div class="order-actions">
+
+                {% if order.status == "pending" %}
+                    <form method="POST" action="/vendor/approve_order">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <button class="approve-btn">Approve</button>
+                    </form>
+
+                    <form method="POST" action="/vendor/cancel_order">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <button class="cancel-btn">Cancel</button>
+                    </form>
+                {% endif %}
+
+                {% if order.status == "confirmed" %}
+                    <form method="POST" action="/vendor/ship_order">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <button class="ship-btn">Mark Shipped</button>
+                    </form>
+                {% endif %}
+
+                <a href="/chat/{{ order.user_id }}" class="message-btn">
+                    Message Customer
+                </a>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}
