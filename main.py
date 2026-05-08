@@ -52,6 +52,14 @@ def get_current_prices():
     # print(pricedict)
     return pricedict
 
+def get_product_varient_price(product_varient_id):
+    prices=get_current_prices()
+    product_id=conn.execute(text("select product_id from product_variants where id= :product_varient_id"),
+        {"product_varient_id":product_varient_id}).fetchone()[0]
+    # print("product_id:",product_id)
+    # print("price:",prices[product_id])
+    return prices[product_id]
+
 def get_cart_total(user_id):
     items  = conn.execute(text("select (select product_id from product_variants p where p.id=c.product_variant_id) as product_id, quantity from cart_items c Where cart_id = (select id from carts where user_id=:user_id)"),
         {"user_id":user_id}).fetchall()
@@ -459,8 +467,25 @@ def purchase():
         SELECT * FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)    
         """),{"user_id": user_id})
 
+    conn.execute(text("INSERT INTO orders (user_id,order_date,status) VALUES (:user_id,now(),'pending')"),
+        {"user_id":user_id})
+
+    order_id = conn.execute(text("Select MAX(id) from orders Where user_id = :user_id"),
+        {"user_id":user_id}).fetchone()[0]
+
     for i in items:
-        print("item","id",i[0],"cart_id",i[1],"product_varient_id",i[2],"quantity",i[3])
+        stock = conn.execute(text("Select stock From product_variants Where id = :id"),
+            {"id":i[2]}).fetchone()
+        conn.execute(text("Update product_variants Set stock = :stock Where id = :id"),
+            {"stock":stock[0]-(i[3]),"id":i[2]})
+        vendor_id = conn.execute(text("select vendor_id from products where id=(select product_id from product_variants where id=:product_variant_id)"),
+            {"product_variant_id":i[2]}).fetchone()[0]
+        print("item id",i[2])
+        print("item price", get_product_varient_price(i[2]))
+        conn.execute(text("INSERT INTO order_items (order_id, product_variant_id, vendor_id, quantity, price_at_purchase) VALUES (:order_id, :product_variant_id, :vendor_id, :quantity, :price_at_purchase)"),
+            {"order_id":order_id, "product_variant_id":i[2], "vendor_id":vendor_id, "quantity":i[3], "price_at_purchase":get_product_varient_price(i[2])})
+        # print("item:","id",i[0],"cart_id",i[1],"product_varient_id",i[2],"quantity",i[3])
+        # print(i)
 
     conn.execute(text("""
         DELETE FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)    
@@ -1020,6 +1045,7 @@ def vendor_ship_order():
     return redirect("/vendor/orders")
 
 
+<<<<<<< Updated upstream
 
 
 
@@ -1303,5 +1329,7 @@ def add_review():
 
 
 
+=======
+>>>>>>> Stashed changes
 if __name__ == "__main__":
     app.run(debug=True)
