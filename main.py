@@ -797,7 +797,7 @@ def manage_variants(product_id):
 
     return render_template("vendor/variants.html", variants=variants, product_id=product_id)
 
-@app.route("/vendor/edit-product/<int:product_id>", methods=["GET","POST"])
+@app.route("/vendor/edit-product/<int:product_id>", methods=["GET", "POST"])
 def edit_product(product_id):
     user = get_current_user()
 
@@ -805,20 +805,25 @@ def edit_product(product_id):
         return redirect(url_for("home"))
 
     product = conn.execute(text("""
-    SELECT p.*
-    FROM products p
-    JOIN vendors v ON p.vendor_id = v.id
-    WHERE p.id = :pid AND v.user_id = :uid
+        SELECT p.*
+        FROM products p
+        JOIN vendors v ON p.vendor_id = v.id
+        WHERE p.id = :pid AND v.user_id = :uid
     """), {"pid": product_id, "uid": user.id}).fetchone()
 
     if not product:
         return "Unauthorized"
 
+    # UPDATE PRODUCT INFO
     if request.method == "POST":
         conn.execute(text("""
-        UPDATE products SET title=:title, description=:description,
-        price=:price, warranty_period=:warranty, inventory=:inventory
-        WHERE id=:pid
+            UPDATE products
+            SET title=:title,
+                description=:description,
+                price=:price,
+                warranty_period=:warranty,
+                inventory=:inventory
+            WHERE id=:pid
         """), {
             "title": request.form.get("title"),
             "description": request.form.get("description"),
@@ -829,9 +834,20 @@ def edit_product(product_id):
         })
 
         conn.commit()
-        return redirect("/vendor/shop")
+        return redirect(url_for("edit_product", product_id=product_id))
 
-    return render_template("vendor/edit_product.html", product=product)
+    # GET VARIANTS
+    variants = conn.execute(text("""
+        SELECT *
+        FROM product_variants
+        WHERE product_id = :pid
+    """), {"pid": product_id}).fetchall()
+
+    return render_template(
+        "vendor/edit_product.html",
+        product=product,
+        variants=variants
+    )
 
 @app.route("/vendor/add-discount/<int:product_id>", methods=["GET","POST"])
 def add_discount(product_id):
@@ -868,6 +884,23 @@ def add_discount(product_id):
 
     return render_template("vendor/discount.html", product=product)
 
+@app.route("/vendor/delete-variant", methods=["POST"])
+def delete_variant():
+    user = get_current_user()
+
+    if not user or user.role != "vendor":
+        return redirect("/")
+
+    variant_id = request.form["variant_id"]
+
+    conn.execute(text("""
+        DELETE FROM product_variants
+        WHERE id = :id
+    """), {"id": variant_id})
+
+    conn.commit()
+
+    return redirect(request.referrer)
 
 #vendor manage orders page
 @app.route("/vendor/orders")

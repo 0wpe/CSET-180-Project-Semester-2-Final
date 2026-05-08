@@ -8,3 +8,32 @@
 
     <button type="submit">Save</button>
 </form>
+
+<h3>Variants</h3>
+
+<table>
+    <tr>
+        <th>Color</th>
+        <th>Size</th>
+        <th>Stock</th>
+    </tr>
+
+    {% for v in variants %}
+    <tr>
+        <td>{{ v.color }}</td>
+        <td>{{ v.size }}</td>
+        <td>{{ v.stock }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<hr>
+
+<h4>Add Variant</h4>
+
+<form method="POST" action="/vendor/product/{{ product.id }}/variants">
+    <input type="text" name="color" placeholder="Color">
+    <input type="text" name="size" placeholder="Size">
+    <input type="number" name="stock" placeholder="Stock">
+    <button type="submit">Add Variant</button>
+</form>
