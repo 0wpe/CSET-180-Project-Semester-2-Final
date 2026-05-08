@@ -252,6 +252,7 @@ MODIFY status ENUM(
 
 select * from orders;
 
+
 -- add both of these for customer complaints
 ALTER TABLE complaints
 ADD image_url TEXT;

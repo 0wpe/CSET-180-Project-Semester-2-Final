@@ -1,10 +1,232 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-Hello
-</body>
-</html>
+<style>
+.page-header {
+    margin-bottom: 10px;
+    color: black;
+}
+
+.page-header p {
+    color: black;
+}
+
+.complaints-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+    color: white;
+}
+
+/* FORM */
+
+.complaint-form {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 14px;
+    margin-bottom: 30px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    border: 1px solid #333;
+}
+
+.complaint-form input,
+.complaint-form textarea,
+.complaint-form select {
+    background: #2a2a2a;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    color: white;
+    font-size: 0.95rem;
+}
+
+.complaint-form textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.complaint-form input:focus,
+.complaint-form textarea:focus,
+.complaint-form select:focus {
+    outline: 1px solid rgb(171, 29, 38);
+}
+
+/* BUTTON */
+
+.complaint-form button {
+    background: rgb(171, 29, 38);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+
+.complaint-form button:hover {
+    background: rgb(145, 22, 30);
+}
+
+/* COMPLAINT CARDS */
+
+.complaint-card {
+    background: #1e1e1e;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 18px;
+
+    border: 1px solid #333;
+}
+
+.complaint-card h4 {
+    margin-bottom: 8px;
+}
+
+.complaint-card p {
+    margin-bottom: 8px;
+    color: #ccc;
+}
+
+/* STATUS COLORS */
+
+.status {
+    font-weight: 600;
+}
+
+.status.pending {
+    color: gold;
+}
+
+.status.confirmed {
+    color: #4CAF50;
+}
+
+.status.processing {
+    color: #00BFFF;
+}
+
+.status.complete {
+    color: #7CFC00;
+}
+
+.status.rejected {
+    color: crimson;
+}
+
+/* IMAGE */
+
+.complaint-image {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 12px;
+    margin-top: 10px;
+    display: block;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+
+    .complaints-container {
+        padding: 12px;
+    }
+
+    .complaint-form {
+        padding: 16px;
+    }
+
+}
+</style>
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="complaints-container">
+
+    <div class="page-header">
+        <h2>Complaints & Returns</h2>
+        <p>
+            Refund, return, or warranty requests.
+        </p>
+    </div>
+
+    <form method="POST"
+          action="/submit_complaint"
+          enctype="multipart/form-data"
+          class="complaint-form">
+
+        <select name="order_item_id" required>
+
+            <option value="">
+                Select Order Item
+            </option>
+
+            {% for item in orders %}
+                <option value="{{ item.order_item_id }}">
+                    Order #{{ item.order_id }} - {{ item.title }}
+                </option>
+            {% endfor %}
+
+        </select>
+
+        <select name="type" required>
+            <option value="return">Return</option>
+            <option value="refund">Refund</option>
+            <option value="warranty">Warranty Claim</option>
+        </select>
+
+        <input type="text"
+               name="title"
+               placeholder="Complaint Title"
+               required>
+
+        <textarea name="description"
+                  placeholder="Describe the issue..."
+                  required></textarea>
+
+        <input type="file" name="image">
+
+        <button type="submit">
+            Submit Complaint
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h3>Your Complaints</h3>
+
+    {% for complaint in complaints %}
+
+    <div class="complaint-card">
+
+        <h4>{{ complaint.title }}</h4>
+
+        <p>
+            Order #{{ complaint.order_id }} —
+            {{ complaint.product_title }}
+        </p>
+
+        <p>
+            Status:
+            <span class="status {{ complaint.status }}">
+                {{ complaint.status.title() }}
+            </span>
+        </p>
+
+        <p>{{ complaint.description }}</p>
+
+        {% if complaint.image_url %}
+        <img src="{{ complaint.image_url }}" class="complaint-image">
+        {% endif %}
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

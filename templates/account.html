@@ -90,12 +90,12 @@
         <h2>Welcome, {{ current_user.first_name }}!</h2>
 
         <div class="account-grid">
-            {% if current_user.role == "vendor" %}
+            {% if current_user.role == "vendor" %} <!-- displays button for vendor only -->
                 <a href="/vendor/orders" class="account-card">
                     <h3>Manage Orders</h3>
                     <p>Approve, cancel, and ship customer orders</p>
                 </a>
-            {% else %}
+            {% elif current_user.role == "customer" %} <!-- displays button for customer only -->
                 <a href="/orders" class="account-card">
                     <h3>Track Orders</h3>
                     <p>View current orders and their status</p>
@@ -106,17 +106,26 @@
                 <h3>Inbox</h3>
                 <p>Open your inbox</p>
             </a>
-            <a href="/chat/{{ admin.id }}" class="account-card">
-                <h3>Contact Support</h3>
-                <p>Chat with an admin</p>
-            </a>
-            {% if current_user.role == "customer" %}
+            {% if current_user.role != "admin" %}
+                <a href="/chat/{{ admin.id }}" class="account-card">
+                    <h3>Contact Support</h3>
+                    <p>Chat with an admin</p>
+                </a>
+            {% endif %}
+
+            {% if current_user.role == "customer" %} <!-- displays button for customer only -->
                 <a href="/complaints" class="account-card">
                     <h3>Complaints & Returns</h3>
                     <p>Request refunds, returns, or warranty claims</p>
                 </a>
+            {% elif current_user.role == "admin" %} <!-- displays button for Admin only -->
+                <a href="/admin/complaints" class="account-card">
+                    <h3>Manage Complaints</h3>
+                    <p>Review and process customer complaints</p>
+                </a>
             {% endif %}
-            {% if current_user.role == "vendor" %}
+
+            {% if current_user.role == "vendor" %} <!-- displays button for vendor only -->
                 <a href="/vendor/shop" class="account-card">
                     <h3>My Shop</h3>
                     <p>Edit your shop</p>

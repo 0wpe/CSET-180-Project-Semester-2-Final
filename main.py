@@ -1334,16 +1334,268 @@ def add_review():
 
 
 
+#Customer complaints
+@app.route("/complaints")
+def complaints():
 
+    user = get_current_user()
 
+    if not user:
+        return redirect("/login")
 
+    complaints = conn.execute(text("""
+        SELECT
+            c.*,
+            p.title AS product_title,
+            o.id AS order_id
+        FROM complaints c
+        JOIN order_items oi ON c.order_item_id = oi.id
+        JOIN orders o ON oi.order_id = o.id
+        JOIN product_variants pv ON oi.product_variant_id = pv.id
+        JOIN products p ON pv.product_id = p.id
+        WHERE c.user_id = :uid
+        ORDER BY c.created_at DESC
+    """), {
+        "uid": user.id
+    }).fetchall()
 
+    orders = conn.execute(text("""
+        SELECT
+        oi.id AS order_item_id,
+        o.id AS order_id,
+        p.title,
+        o.order_date,
+        o.status
+        FROM order_items oi
+        JOIN orders o ON oi.order_id = o.id
+        JOIN product_variants pv ON oi.product_variant_id = pv.id
+        JOIN products p ON pv.product_id = p.id
+        WHERE o.user_id = :uid
+        ORDER BY o.order_date DESC
+    """), {
+        "uid": user.id
+    }).fetchall()
 
+    return render_template(
+        "complaints.html",
+        complaints=complaints,
+        orders=orders
+    )
 
+#Complaint submission
+@app.route("/submit_complaint", methods=["POST"])
+def submit_complaint():
 
+    user = get_current_user()
 
+    if not user:
+        return redirect("/login")
 
+    order_item_id = request.form["order_item_id"]
+    complaint_type = request.form["type"]
+    title = request.form["title"]
+    description = request.form["description"]
 
+    image = request.files.get("image")
+
+    image_url = None
+
+    if image and image.filename:
+
+        filename = f"{uuid.uuid4().hex}_{secure_filename(image.filename)}"
+
+        upload_folder = "static/uploads/complaints"
+        os.makedirs(upload_folder, exist_ok=True)
+
+        filepath = os.path.join(upload_folder, filename)
+        image.save(filepath)
+
+        image_url = f"/static/uploads/complaints/{filename}"
+
+    # get order/item info
+    item = conn.execute(text("""
+        SELECT
+            oi.*,
+            o.order_date,
+            o.status AS order_status,
+            p.warranty_period
+        FROM order_items oi
+        JOIN orders o ON oi.order_id = o.id
+        JOIN product_variants pv ON oi.product_variant_id = pv.id
+        JOIN products p ON pv.product_id = p.id
+        WHERE oi.id = :id
+    """), {
+        "id": order_item_id
+    }).fetchone()
+
+    status = "pending"
+
+    # auto reject refund/return after 7 days
+    days_since = (datetime.now() - item.order_date).days
+
+    if complaint_type in ["return", "refund"] and days_since > 7:
+        status = "rejected"
+
+    # auto reject expired warranty
+    if complaint_type == "warranty":
+
+        if not item.warranty_period:
+            status = "rejected"
+
+        elif days_since > item.warranty_period:
+            status = "rejected"
+
+    conn.execute(text("""
+        INSERT INTO complaints
+        (
+            user_id,
+            order_item_id,
+            type,
+            status,
+            title,
+            description,
+            image_url,
+            created_at
+        )
+        VALUES
+        (
+            :user_id,
+            :order_item_id,
+            :type,
+            :status,
+            :title,
+            :description,
+            :image_url,
+            NOW()
+        )
+    """), {
+        "user_id": user.id,
+        "order_item_id": order_item_id,
+        "type": complaint_type,
+        "status": status,
+        "title": title,
+        "description": description,
+        "image_url": image_url
+    })
+
+    conn.commit()
+
+    return redirect("/complaints")
+
+#Admin complaints
+@app.route("/admin/complaints")
+def admin_complaints():
+
+    user = get_current_user()
+
+    if not user or user.role != "admin":
+        return redirect("/")
+
+    complaints = conn.execute(text("""
+        SELECT
+            c.*,
+            p.title AS product_title,
+            u.username,
+            u.first_name,
+            u.last_name,
+            o.id AS order_id
+        
+        FROM complaints c
+        
+        JOIN users u
+            ON c.user_id = u.id
+        
+        JOIN order_items oi
+            ON c.order_item_id = oi.id
+        
+        JOIN orders o
+            ON oi.order_id = o.id
+        
+        JOIN product_variants pv
+            ON oi.product_variant_id = pv.id
+        
+        JOIN products p
+            ON pv.product_id = p.id
+        
+        ORDER BY c.created_at DESC
+    """)).fetchall()
+
+    return render_template(
+        "admin/complaints.html",
+        complaints=complaints
+    )
+
+#Admin complaint confirm
+@app.route("/admin/confirm_complaint", methods=["POST"])
+def confirm_complaint():
+
+    complaint_id = request.form["complaint_id"]
+
+    conn.execute(text("""
+        UPDATE complaints
+        SET status = 'confirmed'
+        WHERE id = :id
+    """), {
+        "id": complaint_id
+    })
+
+    conn.commit()
+
+    return redirect("/admin/complaints")
+
+#Admin complaint reject
+@app.route("/admin/reject_complaint", methods=["POST"])
+def reject_complaint():
+
+    complaint_id = request.form["complaint_id"]
+
+    conn.execute(text("""
+        UPDATE complaints
+        SET status = 'rejected'
+        WHERE id = :id
+    """), {
+        "id": complaint_id
+    })
+
+    conn.commit()
+
+    return redirect("/admin/complaints")
+
+#Admin complaint process
+@app.route("/admin/process_complaint", methods=["POST"])
+def process_complaint():
+
+    complaint_id = request.form["complaint_id"]
+
+    conn.execute(text("""
+        UPDATE complaints
+        SET status = 'processing'
+        WHERE id = :id
+    """), {
+        "id": complaint_id
+    })
+
+    conn.commit()
+
+    return redirect("/admin/complaints")
+
+#Admin complaint complete
+@app.route("/admin/complete_complaint", methods=["POST"])
+def complete_complaint():
+
+    complaint_id = request.form["complaint_id"]
+
+    conn.execute(text("""
+        UPDATE complaints
+        SET status = 'complete'
+        WHERE id = :id
+    """), {
+        "id": complaint_id
+    })
+
+    conn.commit()
+
+    return redirect("/admin/complaints")
 
 
 if __name__ == "__main__":
