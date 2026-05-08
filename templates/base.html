@@ -47,10 +47,11 @@
                     <img src="{{ url_for('static', filename='images/icons/account.svg') }}" class="NavIcons" alt="account">
                 </a>
 
+                {% if current_user.role == "customer" %}
                 <a href="/cart">
                     <img src="{{ url_for('static', filename='images/icons/cart.svg') }}" class="NavIcons" alt="cart">
                 </a>
-
+                {% endif %}
                 {% if session.get("user_id") %}
                     <a href="/logout">
                         <img src="{{ url_for('static', filename='images/icons/logout.svg') }}" class="NavIcons" alt="logout">
