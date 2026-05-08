@@ -492,7 +492,47 @@ def purchase():
         """),{"user_id": user_id})
     conn.commit()
 
-    return render_template("index.html",thank=True)
+    sponsored = conn.execute(text("""
+    SELECT p.*,
+        (
+            SELECT pi.image_url
+            FROM product_images pi
+            WHERE pi.product_id = p.id
+            ORDER BY pi.id ASC
+            LIMIT 1
+        ) AS image_url
+        FROM products p
+        WHERE p.is_sponsored = 1
+    """)).fetchall()
+
+    discounted = conn.execute(text("""
+        SELECT p.*,
+        d.new_price,
+        (
+            SELECT pi.image_url
+            FROM product_images pi
+            WHERE pi.product_id = p.id
+            ORDER BY pi.id ASC
+            LIMIT 1
+        ) AS image_url
+        FROM products p
+        JOIN discounts d ON p.id = d.product_id
+    """)).fetchall()
+
+    packages = conn.execute(text("""
+        SELECT p.*,
+        (
+            SELECT pi.image_url
+            FROM product_images pi
+            WHERE pi.product_id = p.id
+            ORDER BY pi.id ASC
+            LIMIT 1
+        ) AS image_url
+        FROM products p
+        WHERE p.is_package = 1
+    """)).fetchall()
+
+    return render_template("index.html",thank=True,sponsored=sponsored,discounted=discounted,packages=packages)
 
 #Account page
 @app.route("/account")
