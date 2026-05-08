@@ -38,12 +38,13 @@ body {
 
 /* Start Menu Button */
 .menu-btn {
+    position: relative;
     top: 15px;
     left: 15px;
     font-size: 24px;
     cursor: pointer;
     color: var(--accent-color);
-    text-align:center;
+    text-align: center;
 }
 
 /* Sidebar */
@@ -51,10 +52,9 @@ body {
     display: flex;
     position: fixed;
     top: 0;
-    left: -250px; /* Hides menu by default */
+    left: -250px;
     width: 250px;
     height: 100vh;
-    /* padding-top: var(--topbar-height); */
     transition: 0.3s;
 }
 
@@ -80,7 +80,6 @@ body {
 
 #x {
     font-size: 3rem;
-    /* font-weight: 100; */
     margin-top: 2rem;
 }
 
@@ -109,13 +108,13 @@ body {
     text-decoration: none;
     font-size: 0.9rem;
 }
-.NavIcons{
+
+.NavIcons {
     display: inline;
     padding: 3px;
     border: 1px solid white;
     border-radius: 15px;
     height: 40px;
     width: 40px;
-    background-color:white;
-    }
-/* End Top Bar */
+    background-color: white;
+}

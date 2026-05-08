@@ -1,42 +1,61 @@
 {% extends "base.html" %}
 
-{% block title %}Coffins R Us{% endblock %}
+{% block title %}Search Results{% endblock %}
 
 {% block content %}
 
-<h2>Search Results{% if query %} for "{{ query }}"{% endif %}</h2>
+<h2>
+    Search Results{% if query %} for "{{ query }}"{% endif %}
+</h2>
 
 <div class="products-page">
+
     {% for product in products %}
+
         <div class="card">
 
             <div class="card-image">
-                {% if product.image_url %}
-                <a href="/search/{{ product.id }}" class="card-link"><img src="{{ product.image_url }}"></a>
-                {% else %}
-                    <img src="/static/images/default.png">
-                {% endif %}
+                <a href="/product/{{ product.id }}" class="card-link">
+                    <img src="{{ product.image_url if product.image_url else '/static/images/products/default.png' }}">
+                </a>
             </div>
 
             <div class="card-info">
-                <a href="/search/{{ product.id }}" class="card-link">
+
+                <a href="/product/{{ product.id }}" class="card-link">
                     <h2>{{ product.title }}</h2>
                 </a>
-                <p>{{ product.description }}</p>
-                <p>{{ product.vendor_id }}</p>
-                <p>{{ product.warranty_period }}</p>
-                <p class="price">${{ product.price }}</p>
-                <p>{{ product.inventory }}</p>
 
-                <form action="/add_to_cart" method="POST">
-                    <input type="hidden" name="product_variant_id" value="{{ product.variant_id }}">
+                <p class="description">{{ product.description }}</p>
+
+                <p class="price">${{ product.price }}</p>
+
+                <p class="stock">
+                    {% if product.inventory > 0 %}
+                        In Stock ({{ product.inventory }})
+                    {% else %}
+                        Out of Stock
+                    {% endif %}
+                </p>
+
+                <form action="/add_to_cart" method="POST" class="add-cart-form">
+
+                    <input type="hidden" name="product_variant_id" value="">
+
                     <input type="number" name="quantity" value="1" min="1" class="qty-input">
-                    <button type="submit">Add to Cart</button>
+
+                    <button type="submit" disabled>
+                        Select Product First
+                    </button>
+
                 </form>
+
             </div>
+
         </div>
+
     {% endfor %}
+
 </div>
 
 {% endblock %}
-

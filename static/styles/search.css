@@ -2,14 +2,13 @@
 .products-page {
     display: flex;
     flex-direction: column;
-
     padding: 0;
     margin: 0;
 }
 /* End Products Page */
 
 
-/* Start Row Item (NO BOX, ONLY BOTTOM LINE) */
+/* Start Row Item */
 .card {
     display: flex;
     gap: 12px;
@@ -18,12 +17,8 @@
 
     background: white;
 
-    border: none;                 /* 🔥 kills all borders */
-    border-left: none;
-    border-right: none;
-    border-top: none;
-
-    border-bottom: 1px solid #e5e5e5; /* ONLY separator line */
+    border: none;
+    border-bottom: 1px solid #e5e5e5;
 
     box-shadow: none;
     border-radius: 0;
@@ -40,21 +35,21 @@
 
 /* Start Image */
 .card-image {
-    width: 110px;
-    min-width: 110px;
-    height: 110px;
+    width: 90px;
+    min-width: 90px;
+    height: 90px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
     background: #f7f7f7;
-    border: none; /* important */
+    border: none;
 }
 
 .card-image img {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
 }
 /* End Image */
@@ -66,6 +61,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-width: 0;
 }
 /* End Info */
 
@@ -116,26 +112,21 @@
     display: flex;
     align-items: center;
     gap: 6px;
-
     margin-top: 6px;
+    flex-wrap: wrap;
 }
 
 .qty-input {
     width: 50px;
     padding: 4px;
-
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-/* simple marketplace button */
 .card button {
     padding: 6px 10px;
-
     border: 1px solid #ccc;
     background: #f8f8f8;
-    /* background: rgb(0,0,0); */
-    /* cursor: pointer; */
     font-size: 0.8rem;
 }
 
@@ -154,7 +145,6 @@
 .search-input {
     width: 100%;
     padding: 8px 10px;
-
     border: 1px solid #ccc;
     border-radius: 4px;
 }
@@ -169,10 +159,14 @@
         margin: 0 auto;
     }
 
+    .card {
+        padding: 14px;
+    }
+
     .card-image {
-        width: 140px;
-        min-width: 140px;
-        height: 140px;
+        width: 120px;
+        min-width: 120px;
+        height: 120px;
     }
 }
 /* End Tablet */

@@ -75,63 +75,149 @@ def inject_user():
 def home():
 
     sponsored = conn.execute(text("""
-        SELECT p.*, pi.image_url
+        SELECT p.*,
+        (
+            SELECT pi.image_url
+            FROM product_images pi
+            WHERE pi.product_id = p.id
+            ORDER BY pi.id ASC
+            LIMIT 1
+        ) AS image_url
         FROM products p
-        LEFT JOIN product_images pi ON p.id = pi.product_id
         WHERE p.is_sponsored = 1
     """)).fetchall()
 
     discounted = conn.execute(text("""
-        SELECT p.*, pi.image_url, d.new_price
+        SELECT p.*,
+        d.new_price,
+        (
+            SELECT pi.image_url
+            FROM product_images pi
+            WHERE pi.product_id = p.id
+            ORDER BY pi.id ASC
+            LIMIT 1
+        ) AS image_url
         FROM products p
         JOIN discounts d ON p.id = d.product_id
-        LEFT JOIN product_images pi ON p.id = pi.product_id
     """)).fetchall()
 
     packages = conn.execute(text("""
-        SELECT p.*, pi.image_url
+        SELECT p.*,
+        (
+            SELECT pi.image_url
+            FROM product_images pi
+            WHERE pi.product_id = p.id
+            ORDER BY pi.id ASC
+            LIMIT 1
+        ) AS image_url
         FROM products p
-        LEFT JOIN product_images pi ON p.id = pi.product_id
         WHERE p.is_package = 1
     """)).fetchall()
 
-    return render_template("index.html", sponsored=sponsored, discounted=discounted, packages=packages)
+    return render_template("index.html",
+        sponsored=sponsored,
+        discounted=discounted,
+        packages=packages
+    )
 
 @app.route("/search")
 def search():
 
-    q = request.args.get("q","")
+    q = request.args.get("q", "")
+    color = request.args.get("color")
+    size = request.args.get("size")
+    stock = request.args.get("stock")
 
-    if q:
-        products = conn.execute(text("""
-        SELECT p.*, pi.image_url, pv.id AS variant_id
-        FROM products p
-        LEFT JOIN product_images pi ON p.id = pi.product_id
-        JOIN product_variants pv ON pv.product_id = p.id
-        WHERE p.title LIKE :q
-        """),{"q":f"%{q}%"}).fetchall()
-    else:
-        products = conn.execute(text("""
-        SELECT p.*, pi.image_url, pv.id AS variant_id
-        FROM products p
-        LEFT JOIN product_images pi ON p.id = pi.product_id
-        JOIN product_variants pv ON pv.product_id = p.id
-        """)).fetchall()
+    query = """
+    SELECT DISTINCT
+        p.*,
+        pv.id AS variant_id,
+        pv.color,
+        pv.size,
+        pv.stock,
+        (
+            SELECT pi.image_url
+            FROM product_images pi
+            WHERE pi.product_id = p.id
+            ORDER BY pi.id ASC
+            LIMIT 1
+        ) AS image_url
+    FROM products p
+    JOIN product_variants pv ON pv.product_id = p.id
+    WHERE (p.title LIKE :q OR p.description LIKE :q)
+    """
+
+    params = {"q": f"%{q}%"}
+
+    if color:
+        query += " AND pv.color = :color"
+        params["color"] = color
+
+    if size:
+        query += " AND pv.size = :size"
+        params["size"] = size
+
+    if stock == "in_stock":
+        query += " AND pv.stock > 0"
+
+    products = conn.execute(text(query), params).fetchall()
 
     return render_template("search.html", products=products, query=q)
 
-@app.route("/search/<int:product_id>")
+@app.route("/product/<int:product_id>")
 def product_page(product_id):
 
     product = conn.execute(text("""
-    SELECT p.*, pi.image_url
-    FROM products p
-    LEFT JOIN product_images pi ON p.id = pi.product_id
-    WHERE p.id = :id
-    LIMIT 1
-    """), {"id":product_id}).fetchone()
+        SELECT p.*,
+        (
+            SELECT pi.image_url
+            FROM product_images pi
+            WHERE pi.product_id = p.id
+            ORDER BY pi.id ASC
+            LIMIT 1
+        ) AS image_url
+        FROM products p
+        WHERE p.id = :id
+    """), {"id": product_id}).fetchone()
 
-    return render_template("item_template.html", product=product)
+    if not product:
+        return "Product not found", 404
+
+    images = conn.execute(text("""
+        SELECT image_url
+        FROM product_images
+        WHERE product_id = :id
+        ORDER BY id ASC
+    """), {"id": product_id}).fetchall()
+
+    variants = conn.execute(text("""
+        SELECT *
+        FROM product_variants
+        WHERE product_id = :id
+    """), {"id": product_id}).fetchall()
+
+    reviews = conn.execute(text("""
+        SELECT r.*, u.username
+        FROM reviews r
+        JOIN users u ON r.user_id = u.id
+        WHERE r.product_id = :id
+        ORDER BY r.created_at DESC
+    """), {"id": product_id}).fetchall()
+
+    avg_rating = conn.execute(text("""
+        SELECT AVG(rating)
+        FROM reviews
+        WHERE product_id = :id
+    """), {"id": product_id}).fetchone()[0]
+
+    return render_template(
+        "item_template.html",
+        product=product,
+        images=images,
+        variants=variants,
+        reviews=reviews,
+        avg_rating=avg_rating
+    )
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -270,44 +356,76 @@ def add_to_cart():
         return redirect(url_for("login"))
 
     user_id = session["user_id"]
-    product_variant_id = int(request.form["product_variant_id"])
-    quantity = int(request.form.get("quantity", 1))
 
+    # SAFELY GET VARIANT ID
+    variant_raw = request.form.get("product_variant_id")
+
+    if not variant_raw:
+        return "No product variant selected", 400
+
+    try:
+        product_variant_id = int(variant_raw)
+    except ValueError:
+        return "Invalid product variant", 400
+
+    # SAFE QUANTITY PARSE
+    try:
+        quantity = int(request.form.get("quantity", 1))
+        if quantity < 1:
+            quantity = 1
+    except ValueError:
+        quantity = 1
+
+    # GET OR CREATE CART
     cart = conn.execute(text("""
-    SELECT id FROM carts WHERE user_id = :user_id
+        SELECT id FROM carts WHERE user_id = :user_id
     """), {"user_id": user_id}).fetchone()
 
     if not cart:
         conn.execute(text("""
-        INSERT INTO carts (user_id) VALUES (:user_id)
+            INSERT INTO carts (user_id) VALUES (:user_id)
         """), {"user_id": user_id})
         conn.commit()
 
         cart = conn.execute(text("""
-        SELECT id FROM carts WHERE user_id = :user_id
+            SELECT id FROM carts WHERE user_id = :user_id
         """), {"user_id": user_id}).fetchone()
 
     cart_id = cart[0]
 
+    # CHECK EXISTING ITEM
     item = conn.execute(text("""
-    SELECT id, quantity FROM cart_items
-    WHERE cart_id = :cart_id AND product_variant_id = :product_id
-    """), {"cart_id": cart_id, "product_id": product_variant_id}).fetchone()
+        SELECT id, quantity
+        FROM cart_items
+        WHERE cart_id = :cart_id
+        AND product_variant_id = :variant_id
+    """), {
+        "cart_id": cart_id,
+        "variant_id": product_variant_id
+    }).fetchone()
 
     if item:
         conn.execute(text("""
-        UPDATE cart_items
-        SET quantity = quantity + :quantity
-        WHERE id = :id
-        """), {"quantity": quantity, "id": item[0]})
+            UPDATE cart_items
+            SET quantity = quantity + :quantity
+            WHERE id = :id
+        """), {
+            "quantity": quantity,
+            "id": item.id
+        })
     else:
         conn.execute(text("""
-        INSERT INTO cart_items (cart_id, product_variant_id, quantity)
-        VALUES (:cart_id, :product_id, :quantity)
-        """), {"cart_id": cart_id, "product_id": product_variant_id, "quantity": quantity})
+            INSERT INTO cart_items (cart_id, product_variant_id, quantity)
+            VALUES (:cart_id, :variant_id, :quantity)
+        """), {
+            "cart_id": cart_id,
+            "variant_id": product_variant_id,
+            "quantity": quantity
+        })
 
     conn.commit()
-    return redirect(request.referrer)
+
+    return redirect(request.referrer or url_for("home"))
 
 @app.route("/checkout", methods=["POST"])
 def checkout():
@@ -422,19 +540,26 @@ def cancel_order():
 
 @app.route("/vendor/shop")
 def vendor_shop():
+
     user = get_current_user()
     if not user or user.role != "vendor":
         return redirect(url_for("login"))
 
     vendor = conn.execute(text("""
-    SELECT id FROM vendors WHERE user_id = :uid
+        SELECT id FROM vendors WHERE user_id = :uid
     """), {"uid": user.id}).fetchone()
 
     products = conn.execute(text("""
-    SELECT p.*, pi.image_url
-    FROM products p
-    LEFT JOIN product_images pi ON p.id = pi.product_id
-    WHERE p.vendor_id = :vendor_id
+        SELECT p.*,
+        (
+            SELECT pi.image_url
+            FROM product_images pi
+            WHERE pi.product_id = p.id
+            ORDER BY pi.id ASC
+            LIMIT 1
+        ) AS image_url
+        FROM products p
+        WHERE p.vendor_id = :vendor_id
     """), {"vendor_id": vendor.id}).fetchall()
 
     return render_template("vendor/shop.html", products=products)
@@ -476,21 +601,26 @@ def create_product():
 
         product_id = result.lastrowid
 
-        image = request.files.get("image")
+        images = request.files.getlist("images")
 
-        if image and image.filename != "":
-            filename = secure_filename(image.filename)
-            unique_name = f"{product_id}_{filename}"
+        if images:
+            for image in images:
+                if image and image.filename != "":
+                    filename = secure_filename(image.filename)
+                    unique_name = f"{product_id}_{uuid.uuid4().hex}_{filename}"
 
-            filepath = os.path.join(app.config["UPLOAD_FOLDER"], unique_name)
-            image.save(filepath)
+                    filepath = os.path.join(app.config["UPLOAD_FOLDER"], unique_name)
+                    image.save(filepath)
 
-            db_path = f"/static/images/products/{unique_name}"
+                    db_path = f"/static/images/products/{unique_name}"
 
-            conn.execute(text("""
-            INSERT INTO product_images (product_id, image_url)
-            VALUES (:product_id, :image_url)
-            """), {"product_id": product_id, "image_url": db_path})
+                    conn.execute(text("""
+                        INSERT INTO product_images (product_id, image_url)
+                        VALUES (:product_id, :image_url)
+                    """), {
+                        "product_id": product_id,
+                        "image_url": db_path
+                    })
 
             conn.commit()
 
@@ -855,6 +985,288 @@ def vendor_ship_order():
     conn.commit()
 
     return redirect("/vendor/orders")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route("/admin")
+def admin_dashboard():
+
+    user = get_current_user()
+
+    if not user or user.role != "admin":
+        return redirect("/")
+
+    users = conn.execute(text("""
+    SELECT *
+    FROM users
+    ORDER BY role, username
+    """)).fetchall()
+
+    products = conn.execute(text("""
+    SELECT
+        p.*,
+        u.username AS vendor_username,
+        v.shop_name
+    FROM products p
+    JOIN vendors v ON p.vendor_id = v.id
+    JOIN users u ON v.user_id = u.id
+    ORDER BY p.id DESC
+    """)).fetchall()
+
+    complaints = conn.execute(text("""
+    SELECT
+        c.*,
+        u.username,
+        p.title
+    FROM complaints c
+    JOIN users u ON c.user_id = u.id
+    JOIN order_items oi ON c.order_item_id = oi.id
+    JOIN product_variants pv ON oi.product_variant_id = pv.id
+    JOIN products p ON pv.product_id = p.id
+    ORDER BY c.created_at DESC
+    """)).fetchall()
+
+    return render_template(
+        "admin/dashboard.html",
+        users=users,
+        products=products,
+        complaints=complaints
+    )
+
+@app.route("/admin/delete-product", methods=["POST"])
+def admin_delete_product():
+
+    user = get_current_user()
+
+    if not user or user.role != "admin":
+        return redirect("/")
+
+    product_id = request.form["product_id"]
+
+    conn.execute(text("""
+    DELETE FROM product_images
+    WHERE product_id = :pid
+    """), {"pid": product_id})
+
+    conn.execute(text("""
+    DELETE FROM product_variants
+    WHERE product_id = :pid
+    """), {"pid": product_id})
+
+    conn.execute(text("""
+    DELETE FROM discounts
+    WHERE product_id = :pid
+    """), {"pid": product_id})
+
+    conn.execute(text("""
+    DELETE FROM reviews
+    WHERE product_id = :pid
+    """), {"pid": product_id})
+
+    conn.execute(text("""
+    DELETE FROM products
+    WHERE id = :pid
+    """), {"pid": product_id})
+
+    conn.commit()
+
+    return redirect("/admin")
+
+@app.route("/admin/edit-product/<int:product_id>", methods=["GET", "POST"])
+def admin_edit_product(product_id):
+
+    user = get_current_user()
+
+    if not user or user.role != "admin":
+        return redirect("/")
+
+    product = conn.execute(text("""
+    SELECT *
+    FROM products
+    WHERE id = :pid
+    """), {"pid": product_id}).fetchone()
+
+    if request.method == "POST":
+
+        conn.execute(text("""
+        UPDATE products
+        SET
+            title = :title,
+            description = :description,
+            price = :price,
+            inventory = :inventory,
+            warranty_period = :warranty,
+            is_sponsored = :sponsored
+        WHERE id = :pid
+        """), {
+            "title": request.form["title"],
+            "description": request.form["description"],
+            "price": request.form["price"],
+            "inventory": request.form["inventory"],
+            "warranty": request.form["warranty_period"],
+            "sponsored": 1 if request.form.get("is_sponsored") else 0,
+            "pid": product_id
+        })
+
+        conn.commit()
+
+        return redirect("/admin")
+
+    return render_template(
+        "admin/edit_product.html",
+        product=product
+    )
+
+@app.route("/admin/update-complaint", methods=["POST"])
+def update_complaint():
+
+    user = get_current_user()
+
+    if not user or user.role != "admin":
+        return redirect("/")
+
+    complaint_id = request.form["complaint_id"]
+    status = request.form["status"]
+
+    conn.execute(text("""
+    UPDATE complaints
+    SET status = :status
+    WHERE id = :id
+    """), {
+        "status": status,
+        "id": complaint_id
+    })
+
+    conn.commit()
+
+    return redirect("/admin")
+
+@app.route("/add_review", methods=["POST"])
+def add_review():
+
+    user = get_current_user()
+
+    if not user:
+        return redirect("/login")
+
+    product_id = request.form["product_id"]
+    rating = request.form["rating"]
+    description = request.form["description"]
+
+    image = request.files.get("image")
+
+    image_url = None
+
+    if image and image.filename != "":
+
+        filename = secure_filename(image.filename)
+
+        upload_folder = "static/uploads/reviews"
+
+        os.makedirs(upload_folder, exist_ok=True)
+
+        filepath = os.path.join(upload_folder, filename)
+
+        image.save(filepath)
+
+        image_url = f"/static/uploads/reviews/{filename}"
+
+    conn.execute(text("""
+    INSERT INTO reviews
+    (
+        user_id,
+        product_id,
+        rating,
+        description,
+        image_url
+    )
+    VALUES
+    (
+        :uid,
+        :pid,
+        :rating,
+        :description,
+        :image
+    )
+    """), {
+        "uid": user.id,
+        "pid": product_id,
+        "rating": rating,
+        "description": description,
+        "image": image_url
+    })
+
+    conn.commit()
+
+    return redirect(f"/search/{product_id}")
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -4,33 +4,36 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
+
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/header.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/auth.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/index.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='styles/search.css') }}">
-        <link rel="icon" href="../static/images/logo/logo.png">
+
+        <link rel="icon" href="{{ url_for('static', filename='images/logo/logo.png') }}">
     </head>
+
     <body>
 
     <header class="topbar">
 
-        <!-- Menu Button -->
         <a class="menu-btn NavIcons" onclick="toggleMenu()">☰</a>
-        <!--<button class="menu-btn" onclick="toggleMenu()">☰</button>-->
 
         <div id="sidebar" class="sidebar">
+
             <div id="sidebar-page">
-<!--                Commented these out         -->
-<!--                <a href="/account"><img src="../static/images/icons/account.svg" alt="img"></a> &lt;!&ndash; Account &ndash;&gt;-->
-<!--                <a href="/cart"><img src="../static/images/icons/cart.svg" alt="img"></a> &lt;!&ndash; Cart &ndash;&gt;-->
-<!--                <a href="/login"><img src="../static/images/icons/" alt="img"></a> &lt;!&ndash; Logout &ndash;&gt;-->
+
             </div>
+
             <div id="sidebar-blank" onclick="toggleMenu()">
                 <div id="x">×</div>
             </div>
+
         </div>
 
-        <a href="/"><div id="logo"></div></a>
+        <a href="/">
+            <div id="logo"></div>
+        </a>
 
         <nav class="nav-links">
 
@@ -39,23 +42,37 @@
             </form>
 
             <div>
-                <a href="/account"><img src="{{ url_for('static', filename='images/icons/account.svg') }}" class="NavIcons" alt="account"></a> <!-- Account -->
-                <a href="/cart"><img src="{{ url_for('static', filename='images/icons/cart.svg') }}" class="NavIcons" alt="cart"></a> <!-- Cart -->
 
+                <a href="/account">
+                    <img src="{{ url_for('static', filename='images/icons/account.svg') }}" class="NavIcons" alt="account">
+                </a>
 
-            {% if session.get("user_id") %}
-                <a href="/logout"><img src="{{ url_for('static', filename='images/icons/logout.svg') }}" class="NavIcons" alt="logout"></a> <!-- Logout -->
-            {% else %}
-                <a href="/login" id="NavLogin"><img src="{{ url_for('static', filename='images/icons/login.svg') }}" class="NavIcons" alt="login"></a> <!-- Login -->
-            {% endif %}
+                <a href="/cart">
+                    <img src="{{ url_for('static', filename='images/icons/cart.svg') }}" class="NavIcons" alt="cart">
+                </a>
+
+                {% if session.get("user_id") %}
+                    <a href="/logout">
+                        <img src="{{ url_for('static', filename='images/icons/logout.svg') }}" class="NavIcons" alt="logout">
+                    </a>
+                {% else %}
+                    <a href="/login" id="NavLogin">
+                        <img src="{{ url_for('static', filename='images/icons/login.svg') }}" class="NavIcons" alt="login">
+                    </a>
+                {% endif %}
+
             </div>
+
         </nav>
+
     </header>
 
     <main>
         {% block content %}
         {% endblock %}
     </main>
+
     <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
+
     </body>
 </html>

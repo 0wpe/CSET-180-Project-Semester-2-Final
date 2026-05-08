@@ -26,7 +26,6 @@
     margin-bottom: 0.5rem;
 }
 
-/* Inputs */
 .form input,
 .form textarea {
     padding: 0.8rem;
@@ -43,18 +42,15 @@
     resize: vertical;
 }
 
-/* File input */
 .form input[type="file"] {
     padding: 0.4rem;
 }
 
-/* Labels */
 .form label {
     font-size: 0.9rem;
     opacity: 0.8;
 }
 
-/* Button */
 .form button {
     padding: 0.8rem;
     border: none;
@@ -64,7 +60,6 @@
     border-radius: 5px;
 }
 
-/* Variant section (safe future structure, visually simple for now) */
 .variant-box {
     display: flex;
     gap: 0.5rem;
@@ -74,7 +69,22 @@
     flex: 1;
 }
 
-/* Mobile */
+/* Image preview grid */
+#preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+#preview img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
 @media (max-width: 768px) {
     .form {
         border-radius: 0;
@@ -110,8 +120,11 @@
         <label>Warranty Period</label>
         <input type="number" name="warranty_period">
 
-        <label>Image</label>
-        <input type="file" name="image">
+        <!-- MULTIPLE IMAGES -->
+        <label>Images</label>
+        <input type="file" name="images" multiple accept="image/*" onchange="previewImages(event)">
+
+        <div id="preview"></div>
 
         <hr>
 
@@ -127,3 +140,48 @@
     </form>
 
 </div>
+
+<script>
+let selectedFiles = [];
+
+const fileInput = document.querySelector('input[name="images"]');
+const preview = document.getElementById("preview");
+
+// when user selects files
+fileInput.addEventListener("change", function (event) {
+    const newFiles = Array.from(event.target.files);
+
+    // merge old + new
+    selectedFiles = selectedFiles.concat(newFiles);
+
+    renderPreview();
+    updateInputFiles();
+});
+
+function renderPreview() {
+    preview.innerHTML = "";
+
+    selectedFiles.forEach(file => {
+        if (!file.type.startsWith("image/")) return;
+
+        const img = document.createElement("img");
+        const url = URL.createObjectURL(file);
+
+        img.src = url;
+        img.onload = () => URL.revokeObjectURL(url);
+
+        preview.appendChild(img);
+    });
+}
+
+// IMPORTANT: rebuild input.files manually
+function updateInputFiles() {
+    const dataTransfer = new DataTransfer();
+
+    selectedFiles.forEach(file => {
+        dataTransfer.items.add(file);
+    });
+
+    fileInput.files = dataTransfer.files;
+}
+</script>

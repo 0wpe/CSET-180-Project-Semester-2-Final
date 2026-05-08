@@ -1,74 +1,73 @@
-<style>
-    body.no-scroll {
-        overflow: hidden;
-    }
-
-    .thank_you{
-        z-index:10000;
-        border:1px black solid;
-        border-radius:5px;
-        width:fit-content;
-        position:absolute;
-        top:50%;
-        left:50%;
-        transform: translate(-50%, -50%);
-        padding: 10px 16px;
-        background-color: white;
-    }
-
-    .thank_you_button{
-        width:fit-content;
-        margin:0px auto;
-    }
-
-    .filter{
-        z-index: 9999;
-        width:100vw;
-        height:100vh;
-        background-color: rgba(0,0,0,.75);
-    }
-
-
-</style>
-
-
-
 {% extends "base.html" %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
 
+<style>
+body.no-scroll {
+    overflow: hidden;
+}
+
+.thank_you{
+    z-index:10000;
+    border:1px black solid;
+    border-radius:5px;
+    width:fit-content;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform: translate(-50%, -50%);
+    padding: 10px 16px;
+    background-color: white;
+}
+
+.thank_you_button{
+    width:fit-content;
+    margin:0px auto;
+}
+
+.filter{
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    width:100vw;
+    height:100vh;
+    background-color: rgba(0,0,0,.75);
+}
+</style>
+
 {% if thank %}
-    <div class="filter">
-    </div>
+    <div class="filter"></div>
+
     <div class="thank_you">
         <h2>Thank you for your purchase!</h2>
         <div class="thank_you_button">
             <button onclick="closeMessage()">Close</button>
         </div>
     </div>
+
     <script>
-        // Disable scrolling when thank-you modal is shown
         document.body.classList.add("no-scroll");
     </script>
 {% endif %}
 
 <script>
-    function closeMessage(){
-        const filter=document.getElementsByClassName("filter")[0]
-        const message=document.getElementsByClassName("thank_you")[0]
-        filter.style.display="none";
-        message.style.display="none";
-        document.body.classList.remove("no-scroll");
-    }
+function closeMessage(){
+    const filter=document.getElementsByClassName("filter")[0]
+    const message=document.getElementsByClassName("thank_you")[0]
+    filter.style.display="none";
+    message.style.display="none";
+    document.body.classList.remove("no-scroll");
+}
 </script>
 
 <h2>Sponsored</h2>
 <div class="products-grid">
     {% for product in sponsored %}
-        <a href="/search/{{ product.id }}" class="product-card">
-            <img src="{{ product.image_url }}" />
+        <a href="/product/{{ product.id }}" class="product-card">
+            <img src="{{ product.image_url }}">
             <h3>{{ product.title }}</h3>
             <p>${{ product.price }}</p>
         </a>
@@ -78,8 +77,8 @@
 <h2>Discounted Deals</h2>
 <div class="products-grid">
     {% for product in discounted %}
-        <a href="/search/{{ product.id }}" class="product-card discount">
-            <img src="{{ product.image_url }}" />
+        <a href="/product/{{ product.id }}" class="product-card discount">
+            <img src="{{ product.image_url }}">
             <h3>{{ product.title }}</h3>
             <p><del>${{ product.price }}</del> ${{ product.new_price }}</p>
         </a>
@@ -89,8 +88,8 @@
 <h2>Package Deals</h2>
 <div class="products-grid">
     {% for product in packages %}
-        <a href="/search/{{ product.id }}" class="product-card package">
-            <img src="{{ product.image_url }}" />
+        <a href="/product/{{ product.id }}" class="product-card package">
+            <img src="{{ product.image_url }}">
             <h3>{{ product.title }}</h3>
             <p>${{ product.price }}</p>
         </a>

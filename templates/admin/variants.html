@@ -1,0 +1,16 @@
+<h2>Add Variants</h2>
+
+<form method="POST">
+    <input name="color" placeholder="Color">
+    <input name="size" placeholder="Size">
+    <input name="stock" placeholder="Stock">
+    <button type="submit">Add Variant</button>
+</form>
+
+<hr>
+
+{% for v in variants %}
+    <div>
+        {{ v.color }} | {{ v.size }} | {{ v.stock }}
+    </div>
+{% endfor %}
