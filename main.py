@@ -1045,64 +1045,6 @@ def vendor_ship_order():
     return redirect("/vendor/orders")
 
 
-<<<<<<< Updated upstream
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @app.route("/admin")
 def admin_dashboard():
 
@@ -1316,20 +1258,5 @@ def add_review():
     return redirect(f"/search/{product_id}")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-=======
->>>>>>> Stashed changes
 if __name__ == "__main__":
     app.run(debug=True)
