@@ -258,3 +258,15 @@ ALTER TABLE complaints
 ADD image_url TEXT;
 ALTER TABLE complaints
 ADD admin_notes TEXT;
+
+INSERT INTO users
+(first_name, last_name, email, username, password, role)
+VALUES
+(
+    'Admin',
+    'User',
+    'admin@example.com',
+    'admin',
+    'scrypt:32768:8:1$8UZvWBzzXnNMtSIp$68a7c8434fb51f7ade2e9feedbf6f43452f5d17e58bb571e6068bdde50d0c114a129777ed32b210466afb9fd641ad23195f5bbb3f7b7a1f0a8248b808792d065',
+    'admin'
+);
