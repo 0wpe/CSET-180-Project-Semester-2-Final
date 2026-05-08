@@ -151,22 +151,22 @@ def search():
             LIMIT 1
         ) AS image_url
     FROM products p
-    JOIN product_variants pv ON pv.product_id = p.id
+    LEFT JOIN product_variants pv ON pv.product_id = p.id
     WHERE (p.title LIKE :q OR p.description LIKE :q)
     """
 
     params = {"q": f"%{q}%"}
 
     if color:
-        query += " AND pv.color = :color"
+        query += " AND (pv.color = :color OR pv.color IS NULL)"
         params["color"] = color
 
     if size:
-        query += " AND pv.size = :size"
+        query += " AND (pv.size = :size OR pv.size IS NULL)"
         params["size"] = size
 
     if stock == "in_stock":
-        query += " AND pv.stock > 0"
+        query += " AND (pv.stock > 0 OR pv.stock IS NULL)"
 
     products = conn.execute(text(query), params).fetchall()
 
@@ -599,7 +599,7 @@ def create_product():
     if request.method == "POST":
 
         vendor = conn.execute(text("""
-        SELECT id FROM vendors WHERE user_id = :uid
+            SELECT id FROM vendors WHERE user_id = :uid
         """), {"uid": user.id}).fetchone()
 
         vendor_id = vendor.id
@@ -611,8 +611,8 @@ def create_product():
         inventory = request.form.get("inventory") or 0
 
         result = conn.execute(text("""
-        INSERT INTO products (title, description, vendor_id, warranty_period, price, inventory)
-        VALUES (:title, :description, :vendor_id, :warranty_period, :price, :inventory)
+            INSERT INTO products (title, description, vendor_id, warranty_period, price, inventory)
+            VALUES (:title, :description, :vendor_id, :warranty_period, :price, :inventory)
         """), {
             "title": title,
             "description": description,
@@ -626,6 +626,18 @@ def create_product():
 
         product_id = result.lastrowid
 
+        # ✅ FIX: ALWAYS CREATE DEFAULT VARIANT (CRITICAL)
+        conn.execute(text("""
+            INSERT INTO product_variants (product_id, color, size, stock)
+            VALUES (:pid, 'Default', 'Default', :stock)
+        """), {
+            "pid": product_id,
+            "stock": int(inventory)
+        })
+
+        conn.commit()
+
+        # handle images
         images = request.files.getlist("images")
 
         if images:
@@ -649,7 +661,7 @@ def create_product():
 
             conn.commit()
 
-            return redirect("/account")
+        return redirect(url_for("edit_product", product_id=product_id))
 
     return render_template("vendor/create_product.html")
 
@@ -1045,6 +1057,67 @@ def vendor_ship_order():
     return redirect("/vendor/orders")
 
 
+<<<<<<< Updated upstream
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> Stashed changes
 @app.route("/admin")
 def admin_dashboard():
 
@@ -1258,5 +1331,22 @@ def add_review():
     return redirect(f"/search/{product_id}")
 
 
+<<<<<<< Updated upstream
+=======
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> Stashed changes
 if __name__ == "__main__":
     app.run(debug=True)
