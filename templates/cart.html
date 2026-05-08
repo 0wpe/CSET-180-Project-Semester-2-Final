@@ -122,7 +122,7 @@
                                     <input type="number" name="quantity" class="quantity_input" value="{{ item.quantity }}" min="1" max="{{ item.stock }}" onchange="this.form.submit()">
                                 </form>
 
-                                <p class="price_tag">Price: ${{ item.price * item.quantity}}</p>
+                                <p class="price_tag">Price: ${{ prices[item.product_id] * item.quantity }}</p>
 
                                 <form action="/remove_cart_item" class="remove_btn" method="post">
                                     <input type="hidden" name="id" value="{{ item.cart_item_id }}">

@@ -40,6 +40,33 @@ def is_vendor(user):
 def is_customer(user):
     return user and user.role == "customer"
 
+def get_current_prices():
+    priceslist = conn.execute(text("select prod.id, CASE WHEN prod.id in (select product_id from discounts where start_time IS NULL OR now()<end_time and now()>start_time) THEN (select new_price from products p join discounts d on p.id=d.product_id Where p.id=prod.id) ELSE (select price from products p where p.id=prod.id) end as price from products prod"),
+    ).fetchall()
+    # print("Prices:")
+    # print("Product ID, Current Price")
+    # print(priceslist)
+    pricedict={}
+    for i in priceslist:
+        pricedict[i[0]]=i[1]
+    # print(pricedict)
+    return pricedict
+
+def get_cart_total(user_id):
+    items  = conn.execute(text("select (select product_id from product_variants p where p.id=c.product_variant_id) as product_id, quantity from cart_items c Where cart_id = (select id from carts where user_id=:user_id)"),
+        {"user_id":user_id}).fetchall()
+    itemdict={}
+    for i in items:
+        itemdict[i[0]]=i[1]
+    # print(itemdict)
+    prices=get_current_prices()
+    total=0
+    for item in itemdict:
+        # print(item,itemdict[item],prices[item])
+        total+=(prices[item]*itemdict[item])
+    # print("total:",total)
+    return total
+
 @app.context_processor
 def inject_user():
     return dict(current_user=get_current_user())
@@ -172,19 +199,19 @@ def logout():
     session.clear()
     return redirect(url_for("home"))
 
-def cart_Total(user_id):
-    cart_items = conn.execute(text("""
-    SELECT *
-    FROM cart_items ci
-    JOIN product_variants pv ON ci.product_variant_id = pv.id
-    JOIN products p ON pv.product_id = p.id
-    WHERE ci.cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
-    """), {"user_id": user_id}).fetchall()
+# def cart_Total(user_id):
+#     cart_items = conn.execute(text("""
+#     SELECT *
+#     FROM cart_items ci
+#     JOIN product_variants pv ON ci.product_variant_id = pv.id
+#     JOIN products p ON pv.product_id = p.id
+#     WHERE ci.cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
+#     """), {"user_id": user_id}).fetchall()
 
-    total = 0
-    for i in cart_items:
-        total += (i.price * i.quantity)
-    return total
+#     total = 0
+#     for i in cart_items:
+#         total += (i.price * i.quantity)
+#     return total
 
 @app.route("/cart")
 def cart():
@@ -206,12 +233,13 @@ def cart():
     JOIN products p ON pv.product_id = p.id
     WHERE ci.cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
     """), {"user_id": user_id}).fetchall()
-
-    subtotal = cart_Total(user_id)
+    subtotal = get_cart_total(user_id)
     tax = subtotal * Decimal("0.06")
     total = f"{subtotal + tax:.2f}"
-
-    return render_template("cart.html", cart_items=cart_items, subtotal=f"{subtotal:.2f}", tax=f"{tax:.2f}", total=total, user_id=user_id)
+    tax = f"{tax:.2f}"
+    subtotal = f"{subtotal:.2f}"
+    prices=get_current_prices()
+    return render_template("cart.html", cart_items=cart_items, subtotal=subtotal, tax=tax, total=total, user_id=user_id,prices=prices)
 
 @app.route("/update_cart_quantity", methods=["POST"])
 def update_cart_quantity():
@@ -296,12 +324,14 @@ def checkout():
     WHERE ci.cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
     """), {"user_id": user_id}).fetchall()
 
-    subtotal = cart_Total(user_id)
+    subtotal = get_cart_total(user_id)
     shipping = subtotal * random.randrange(1,150) * Decimal("0.01")
     tax = (shipping + subtotal) * Decimal("0.06")
     total = f"{shipping + subtotal + tax:.2f}"
-
-    return render_template("checkout.html", cart_items=cart_items, subtotal=subtotal, tax=tax, total=total, shipping=shipping, user_id=user_id)
+    shipping = f"{shipping:.2f}"
+    tax = f"{tax:.2f}"
+    prices=get_current_prices()
+    return render_template("checkout.html", cart_items=cart_items, subtotal=subtotal, tax=tax, total=total, shipping=shipping, user_id=user_id, prices=prices)
 
 @app.route("/purchase", methods=["POST"])
 def purchase():
@@ -320,7 +350,6 @@ def purchase():
     conn.commit()
 
     return render_template("index.html",thank=True)
-
 
 #Account page
 @app.route("/account")
