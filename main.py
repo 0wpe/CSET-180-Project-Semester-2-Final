@@ -998,7 +998,7 @@ def add_discount(product_id):
         SELECT * FROM products WHERE id = :id
     """), {"id": product_id}).fetchone()
 
-    return render_template("add_discount.html", product=product)
+    return render_template("vendor/discount.html", product=product)
 
 @app.route("/vendor/delete-variant", methods=["POST"])
 def delete_variant():
@@ -1196,7 +1196,7 @@ def vendor_ship_order():
 
 
 
-@app.route("/admin")
+@app.route("/admin/dashboard")
 def admin_dashboard():
 
     user = get_current_user()
@@ -1288,41 +1288,53 @@ def admin_edit_product(product_id):
     if not user or user.role != "admin":
         return redirect("/")
 
+    # GET PRODUCT
     product = conn.execute(text("""
-    SELECT *
-    FROM products
-    WHERE id = :pid
+        SELECT *
+        FROM products
+        WHERE id = :pid
     """), {"pid": product_id}).fetchone()
 
+    if not product:
+        return "Product not found", 404
+
+    # UPDATE PRODUCT INFO
     if request.method == "POST":
 
         conn.execute(text("""
-        UPDATE products
-        SET
-            title = :title,
-            description = :description,
-            price = :price,
-            inventory = :inventory,
-            warranty_period = :warranty,
-            is_sponsored = :sponsored
-        WHERE id = :pid
+            UPDATE products
+            SET
+                title = :title,
+                description = :description,
+                price = :price,
+                inventory = :inventory,
+                warranty_period = :warranty
+            WHERE id = :pid
         """), {
-            "title": request.form["title"],
-            "description": request.form["description"],
-            "price": request.form["price"],
-            "inventory": request.form["inventory"],
-            "warranty": request.form["warranty_period"],
-            "sponsored": 1 if request.form.get("is_sponsored") else 0,
+            "title": request.form.get("title"),
+            "description": request.form.get("description"),
+            "price": request.form.get("price"),
+            "inventory": request.form.get("inventory"),
+            "warranty": request.form.get("warranty_period"),
             "pid": product_id
         })
 
         conn.commit()
 
-        return redirect("/admin")
+        return redirect(f"/admin/edit-product/{product_id}")
+
+    # GET VARIANTS
+    variants = conn.execute(text("""
+        SELECT *
+        FROM product_variants
+        WHERE product_id = :pid
+        ORDER BY id ASC
+    """), {"pid": product_id}).fetchall()
 
     return render_template(
         "admin/edit_product.html",
-        product=product
+        product=product,
+        variants=variants
     )
 
 @app.route("/admin/update-complaint", methods=["POST"])
@@ -1348,6 +1360,47 @@ def update_complaint():
     conn.commit()
 
     return redirect("/admin")
+
+@app.route("/admin/add-variant/<int:product_id>", methods=["POST"])
+def admin_add_variant(product_id):
+
+    user = get_current_user()
+
+    if not user or user.role != "admin":
+        return redirect("/")
+
+    conn.execute(text("""
+        INSERT INTO product_variants (product_id, color, size, stock)
+        VALUES (:pid, :color, :size, :stock)
+    """), {
+        "pid": product_id,
+        "color": request.form["color"],
+        "size": request.form["size"],
+        "stock": request.form["stock"]
+    })
+
+    conn.commit()
+
+    return redirect(f"/admin/edit-product/{product_id}")
+
+@app.route("/admin/delete-variant", methods=["POST"])
+def admin_delete_variant():
+
+    user = get_current_user()
+
+    if not user or user.role != "admin":
+        return redirect("/")
+
+    variant_id = request.form["variant_id"]
+
+    conn.execute(text("""
+        DELETE FROM product_variants
+        WHERE id = :id
+    """), {"id": variant_id})
+
+    conn.commit()
+
+    return redirect(request.referrer or "/admin")
 
 @app.route("/add_review", methods=["POST"])
 def add_review():
@@ -1678,4 +1731,5 @@ def complete_complaint():
 
 
 if __name__ == "__main__":
+    print(generate_password_hash("123"))
     app.run(debug=True)

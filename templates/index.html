@@ -36,6 +36,21 @@ body.no-scroll {
     height:100vh;
     background-color: rgba(0,0,0,.75);
 }
+
+/* ===== HORIZONTAL SCROLL 2-ROW GRID ===== */
+.scroll-section {
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+.scroll-grid {
+    display: grid;
+    grid-template-rows: repeat(2, auto);
+    grid-auto-flow: column;
+    grid-auto-columns: 200px;
+    gap: 12px;
+    width: max-content;
+}
 </style>
 
 {% if thank %}
@@ -63,37 +78,43 @@ function closeMessage(){
 }
 </script>
 
+<!-- ===================== SPONSORED ===================== -->
 <h2>Sponsored</h2>
-<div class="products-grid">
-    {% for product in sponsored %}
-        <a href="/product/{{ product.id }}" class="product-card">
-            <img src="{{ product.image_url }}">
-            <h3>{{ product.title }}</h3>
-            <p>${{ product.price }}</p>
-        </a>
-    {% endfor %}
+
+<div class="scroll-section">
+    <div class="scroll-grid">
+
+        {% for product in sponsored %}
+            <a href="/product/{{ product.id }}" class="product-card">
+                <img src="{{ product.image_url }}">
+                <h3>{{ product.title }}</h3>
+                <p>${{ product.price }}</p>
+            </a>
+        {% endfor %}
+
+    </div>
 </div>
 
+<!-- ===================== DISCOUNTED ===================== -->
 <h2>Discounted Deals</h2>
-<div class="products-grid">
-    {% for product in discounted %}
-        <a href="/product/{{ product.id }}" class="product-card discount">
-            <img src="{{ product.image_url }}">
-            <h3>{{ product.title }}</h3>
-            <p><del>${{ product.price }}</del> ${{ product.new_price }}</p>
-        </a>
-    {% endfor %}
-</div>
 
-<h2>Package Deals</h2>
-<div class="products-grid">
-    {% for product in packages %}
-        <a href="/product/{{ product.id }}" class="product-card package">
-            <img src="{{ product.image_url }}">
-            <h3>{{ product.title }}</h3>
-            <p>${{ product.price }}</p>
-        </a>
-    {% endfor %}
+<div class="scroll-section">
+    <div class="scroll-grid">
+
+        {% for product in discounted %}
+            <a href="/product/{{ product.id }}" class="product-card discount">
+                <img src="{{ product.image_url }}">
+
+                <h3>{{ product.title }}</h3>
+
+                <p>
+                    <del>${{ product.price }}</del>
+                    ${{ product.new_price }}
+                </p>
+            </a>
+        {% endfor %}
+
+    </div>
 </div>
 
 {% endblock %}

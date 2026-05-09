@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Edit Product{% endblock %}
+
+{% block content %}
+
+<style>
+* {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.container {
+    width: min(900px, 100%);
+    margin: 40px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow-x: hidden;
+}
+
+.back-arrow {
+    display: inline-block;
+    margin-bottom: 15px;
+    font-size: 16px;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+}
+
+.back-arrow:hover {
+    color: #555;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+textarea {
+    min-height: 100px;
+}
+
+button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.save-btn {
+    background: black;
+    color: white;
+    margin-top: 15px;
+}
+
+.save-btn:hover {
+    background: #333;
+}
+
+.variant-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
+
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+
+    word-break: break-word;
+}
+
+.variant-item div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.variant-item form {
+    justify-self: end;
+}
+
+.delete-btn {
+    background: crimson;
+    color: white;
+    font-size: 12px;
+}
+
+.delete-btn:hover {
+    background: darkred;
+}
+
+.add-box {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+
+    .container {
+        padding: 15px;
+    }
+
+    .variant-item {
+        grid-template-columns: 1fr;
+    }
+
+    .variant-item form {
+        width: 100%;
+    }
+
+    .delete-btn {
+        width: 100%;
+    }
+}
+
+</style>
+
+<div class="container">
+
+    <!-- BACK -->
+    <a href="/admin/dashboard" class="back-arrow">← Back to Dashboard</a>
+
+    <h2>Admin Edit Product</h2>
+
+    <!-- PRODUCT FORM -->
+    <form method="POST">
+
+        <label>Title</label>
+        <input type="text" name="title" value="{{ product.title }}">
+
+        <label>Description</label>
+        <textarea name="description">{{ product.description }}</textarea>
+
+        <label>Price</label>
+        <input type="number" step="0.01" name="price" value="{{ product.price }}">
+
+        <label>Inventory</label>
+        <input type="number" name="inventory" value="{{ product.inventory }}">
+
+        <label>Warranty Period</label>
+        <input type="number" name="warranty_period" value="{{ product.warranty_period }}">
+
+        <button class="save-btn" type="submit">Save Changes</button>
+
+    </form>
+
+    <!-- VARIANTS -->
+    <h3 style="margin-top:30px;">Existing Variants</h3>
+
+    {% if variants %}
+
+        {% for v in variants %}
+        <div class="variant-item">
+
+            <div>
+                ID: {{ v.id }} |
+                {{ v.color }} /
+                {{ v.size }} |
+                Stock: {{ v.stock }}
+            </div>
+
+            <form action="/admin/delete-variant" method="POST">
+                <input type="hidden" name="variant_id" value="{{ v.id }}">
+                <button class="delete-btn" type="submit">Delete</button>
+            </form>
+
+        </div>
+        {% endfor %}
+
+    {% else %}
+        <p>No variants yet.</p>
+    {% endif %}
+
+    <!-- ADD VARIANT -->
+    <div class="add-box">
+
+        <h3>Add Variant</h3>
+
+        <form action="/admin/add-variant/{{ product.id }}" method="POST">
+
+            <label>Color</label>
+            <input type="text" name="color" required>
+
+            <label>Size</label>
+            <input type="text" name="size" required>
+
+            <label>Stock</label>
+            <input type="number" name="stock" required>
+
+            <button class="save-btn" type="submit">Add Variant</button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
