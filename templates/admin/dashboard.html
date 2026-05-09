@@ -24,10 +24,6 @@
     font-weight: bold;
 }
 
-.back-arrow:hover {
-    color: #555;
-}
-
 h2 {
     margin-bottom: 10px;
 }
@@ -36,32 +32,29 @@ h2 {
     margin-top: 30px;
 }
 
-/* CARD */
+/* PRODUCT CARD */
 .card {
+    position: relative;
     padding: 12px;
     border-bottom: 1px solid #eee;
+
     display: flex;
     flex-direction: column;
     gap: 10px;
+
+    min-height: 120px;
 }
 
-/* TEXT */
-.small {
-    color: #555;
-    font-size: 13px;
+/* TOP RIGHT SPONSORED BUTTON */
+.sponsored-toggle-top {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }
 
-/* BUTTON ROW */
-.button-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-/* BUTTONS */
+/* BUTTON BASE */
 button {
-    padding: 10px 12px;
+    padding: 8px 10px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -70,21 +63,54 @@ button {
 
 /* EDIT */
 .edit-btn {
-    background: #111;
+<!--    background: rgb(17, 113, 186) !important;-->
     color: black;
 }
 
 /* DELETE */
 .delete-btn {
-    background: #c1121f;
+    background: var(--accent-color) !important;
     color: black;
 }
 
-/* SELECT */
-select {
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+/* SPONSORED */
+.sponsored-yes {
+    background: green !important;
+    color: black;
+    font-size: 12px;
+    padding: 6px 8px;
+}
+
+.sponsored-no {
+    background: red !important;
+    color: black;
+    font-size: 12px;
+    padding: 6px 8px;
+}
+
+/* BUTTON ROW FIXED */
+.button-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    margin-top: auto;
+    width: 100%;
+}
+
+.button-row button,
+.button-row a {
+    flex: 1;
+}
+
+.button-row button {
+    width: 100%;
+}
+
+/* TEXT */
+.small {
+    color: #555;
+    font-size: 13px;
 }
 
 /* MOBILE FIRST */
@@ -95,17 +121,14 @@ select {
         padding: 12px;
     }
 
-    .card {
-        padding: 10px;
-    }
-
     .button-row {
         flex-direction: column;
-        align-items: stretch;
     }
 
-    button, select {
-        width: 100%;
+    /* ✅ MOBILE FIX: smaller sponsored button */
+    .sponsored-toggle-top button {
+        font-size: 10px;
+        padding: 4px 6px;
     }
 }
 </style>
@@ -142,6 +165,20 @@ select {
             {% for p in products %}
                 <div class="card">
 
+                    <!-- TOP RIGHT TOGGLE -->
+                    <div class="sponsored-toggle-top">
+
+                        <form method="POST" action="/admin/toggle-sponsored">
+                            <input type="hidden" name="product_id" value="{{ p.id }}">
+                            <input type="hidden" name="value" value="{{ 0 if p.is_sponsored else 1 }}">
+
+                            <button class="{% if p.is_sponsored %}sponsored-yes{% else %}sponsored-no{% endif %}">
+                                Sponsored: {{ "Yes" if p.is_sponsored else "No" }}
+                            </button>
+                        </form>
+
+                    </div>
+
                     <strong>{{ p.title }}</strong>
 
                     <div class="small">
@@ -151,6 +188,7 @@ select {
                         Stock: {{ p.inventory }}
                     </div>
 
+                    <!-- BOTTOM BUTTONS -->
                     <div class="button-row">
 
                         <a href="/admin/edit-product/{{ p.id }}">
