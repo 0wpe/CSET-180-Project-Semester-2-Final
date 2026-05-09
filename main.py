@@ -1205,33 +1205,37 @@ def admin_dashboard():
         return redirect("/")
 
     users = conn.execute(text("""
-    SELECT *
-    FROM users
-    ORDER BY role, username
+        SELECT *
+        FROM users
+        ORDER BY role, username
     """)).fetchall()
 
     products = conn.execute(text("""
-    SELECT
-        p.*,
-        u.username AS vendor_username,
-        v.shop_name
-    FROM products p
-    JOIN vendors v ON p.vendor_id = v.id
-    JOIN users u ON v.user_id = u.id
-    ORDER BY p.id DESC
+        SELECT 
+            p.id,
+            p.title,
+            p.description,
+            p.price,
+            p.inventory,
+            p.is_sponsored,
+            u.username AS vendor_username
+        FROM products p
+        LEFT JOIN vendors v ON p.vendor_id = v.id
+        LEFT JOIN users u ON v.user_id = u.id
+        ORDER BY p.id DESC
     """)).fetchall()
 
     complaints = conn.execute(text("""
-    SELECT
-        c.*,
-        u.username,
-        p.title
-    FROM complaints c
-    JOIN users u ON c.user_id = u.id
-    JOIN order_items oi ON c.order_item_id = oi.id
-    JOIN product_variants pv ON oi.product_variant_id = pv.id
-    JOIN products p ON pv.product_id = p.id
-    ORDER BY c.created_at DESC
+        SELECT
+            c.*,
+            u.username,
+            p.title
+        FROM complaints c
+        JOIN users u ON c.user_id = u.id
+        JOIN order_items oi ON c.order_item_id = oi.id
+        JOIN product_variants pv ON oi.product_variant_id = pv.id
+        JOIN products p ON pv.product_id = p.id
+        ORDER BY c.created_at DESC
     """)).fetchall()
 
     return render_template(
@@ -1278,7 +1282,7 @@ def admin_delete_product():
 
     conn.commit()
 
-    return redirect("/admin")
+    return redirect("/admin/dashboard")
 
 @app.route("/admin/edit-product/<int:product_id>", methods=["GET", "POST"])
 def admin_edit_product(product_id):
@@ -1359,7 +1363,29 @@ def update_complaint():
 
     conn.commit()
 
-    return redirect("/admin")
+    return redirect("/admin/dashboard")
+
+@app.route("/admin/toggle-sponsored", methods=["POST"])
+def toggle_sponsored():
+
+    user = get_current_user()
+    if not user or user.role != "admin":
+        return redirect("/")
+
+    product_id = request.form["product_id"]
+    value = request.form["value"]  # "1" or "0"
+
+    conn.execute(text("""
+        UPDATE products
+        SET is_sponsored = :val
+        WHERE id = :pid
+    """), {
+        "val": int(value),
+        "pid": product_id
+    })
+
+    conn.commit()
+    return redirect(request.referrer or "/admin/dashboard")
 
 @app.route("/admin/add-variant/<int:product_id>", methods=["POST"])
 def admin_add_variant(product_id):
@@ -1400,7 +1426,7 @@ def admin_delete_variant():
 
     conn.commit()
 
-    return redirect(request.referrer or "/admin")
+    return redirect(request.referrer or "/admin/dashboard")
 
 @app.route("/add_review", methods=["POST"])
 def add_review():
