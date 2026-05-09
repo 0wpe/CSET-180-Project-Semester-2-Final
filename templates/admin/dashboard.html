@@ -7,15 +7,14 @@
 <style>
 .container {
     max-width: 1100px;
-    margin: 40px auto;
+    margin: 20px auto;
     background: white;
-    padding: 25px;
+    padding: 16px;
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     box-sizing: border-box;
 }
 
-/* BACK LINK */
 .back-arrow {
     display: inline-block;
     margin-bottom: 15px;
@@ -30,45 +29,85 @@
 }
 
 h2 {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .section {
     margin-top: 30px;
 }
 
-/* CARDS */
+/* CARD */
 .card {
     padding: 12px;
     border-bottom: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
+/* TEXT */
 .small {
-    color: #666;
+    color: #555;
     font-size: 13px;
 }
 
+/* BUTTON ROW */
+.button-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* BUTTONS */
 button {
-    padding: 8px 12px;
+    padding: 10px 12px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
+    font-weight: 600;
 }
 
-.delete-btn {
-    background: crimson;
-    color: white;
-}
-
+/* EDIT */
 .edit-btn {
-    background: black;
-    color: white;
+    background: #111;
+    color: black;
 }
 
-.edit-btn:hover {
-    background: #333;
+/* DELETE */
+.delete-btn {
+    background: #c1121f;
+    color: black;
 }
 
+/* SELECT */
+select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* MOBILE FIRST */
+@media (max-width: 600px) {
+
+    .container {
+        margin: 10px;
+        padding: 12px;
+    }
+
+    .card {
+        padding: 10px;
+    }
+
+    .button-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    button, select {
+        width: 100%;
+    }
+}
 </style>
 
 <div class="container">
@@ -84,9 +123,10 @@ button {
         {% if users %}
             {% for u in users %}
                 <div class="card">
-                    <strong>{{ u.username }}</strong><br>
-                    Role: {{ u.role }}<br>
-                    Email: {{ u.email }}
+                    <strong>{{ u.username }}</strong>
+                    <div class="small">
+                        Role: {{ u.role }} | Email: {{ u.email }}
+                    </div>
                 </div>
             {% endfor %}
         {% else %}
@@ -102,25 +142,27 @@ button {
             {% for p in products %}
                 <div class="card">
 
-                    <strong>{{ p.title }}</strong><br>
+                    <strong>{{ p.title }}</strong>
 
-                    <span class="small">
+                    <div class="small">
                         ID: {{ p.id }} |
                         Vendor: {{ p.vendor_username or 'None' }} |
                         Price: {{ p.price }} |
                         Stock: {{ p.inventory }}
-                    </span>
+                    </div>
 
-                    <br><br>
+                    <div class="button-row">
 
-                    <a href="/admin/edit-product/{{ p.id }}">
-                        <button class="edit-btn">Edit</button>
-                    </a>
+                        <a href="/admin/edit-product/{{ p.id }}">
+                            <button class="edit-btn">Edit</button>
+                        </a>
 
-                    <form method="POST" action="/admin/delete-product" style="display:inline;">
-                        <input type="hidden" name="product_id" value="{{ p.id }}">
-                        <button class="delete-btn">Delete</button>
-                    </form>
+                        <form method="POST" action="/admin/delete-product">
+                            <input type="hidden" name="product_id" value="{{ p.id }}">
+                            <button class="delete-btn">Delete</button>
+                        </form>
+
+                    </div>
 
                 </div>
             {% endfor %}
@@ -137,14 +179,14 @@ button {
             {% for c in complaints %}
                 <div class="card">
 
-                    <strong>{{ c.title }}</strong><br>
+                    <strong>{{ c.title }}</strong>
 
-                    <span class="small">
+                    <div class="small">
                         User: {{ c.username }} |
                         Status: {{ c.status }} |
                         Type: {{ c.type }} |
                         Date: {{ c.created_at }}
-                    </span>
+                    </div>
 
                     <form method="POST" action="/admin/update-complaint">
                         <input type="hidden" name="complaint_id" value="{{ c.id }}">
