@@ -143,6 +143,10 @@ def search():
         pv.color,
         pv.size,
         pv.stock,
+
+        d.new_price,
+        d.old_price,
+
         (
             SELECT pi.image_url
             FROM product_images pi
@@ -150,12 +154,21 @@ def search():
             ORDER BY pi.id ASC
             LIMIT 1
         ) AS image_url
+
     FROM products p
-    LEFT JOIN product_variants pv ON pv.product_id = p.id
+
+    LEFT JOIN product_variants pv
+        ON pv.product_id = p.id
+
+    LEFT JOIN discounts d
+        ON d.product_id = p.id
+
     WHERE (p.title LIKE :q OR p.description LIKE :q)
     """
 
-    params = {"q": f"%{q}%"}
+    params = {
+        "q": f"%{q}%"
+    }
 
     if color:
         query += " AND (pv.color = :color OR pv.color IS NULL)"
@@ -170,7 +183,11 @@ def search():
 
     products = conn.execute(text(query), params).fetchall()
 
-    return render_template("search.html", products=products, query=q)
+    return render_template(
+        "search.html",
+        products=products,
+        query=q
+    )
 
 @app.route("/product/<int:product_id>")
 def product_page(product_id):

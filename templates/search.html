@@ -14,6 +14,7 @@
 
         <div class="card">
 
+            <!-- IMAGE -->
             <div class="card-image">
                 <a href="/product/{{ product.id }}" class="card-link">
                     <img src="{{ product.image_url if product.image_url else '/static/images/products/default.png' }}">
@@ -22,33 +23,80 @@
 
             <div class="card-info">
 
+                <!-- TITLE -->
                 <a href="/product/{{ product.id }}" class="card-link">
                     <h2>{{ product.title }}</h2>
                 </a>
 
-                <p class="description">{{ product.description }}</p>
+                <!-- DESCRIPTION (FIXED WRAP) -->
+                <p class="description">
+                    {{ product.description }}
+                </p>
 
-                <p class="price">${{ product.price }}</p>
+                <!-- PRICE -->
+                <div class="price">
 
+                    {% if product.new_price %}
+                        <span class="old-price">
+                            ${{ product.price }}
+                        </span>
+
+                        <span class="new-price">
+                            ${{ product.new_price }}
+                        </span>
+                    {% else %}
+                        <span class="normal-price">
+                            ${{ product.price }}
+                        </span>
+                    {% endif %}
+
+                </div>
+
+                <!-- STOCK -->
                 <p class="stock">
-                    {% if product.inventory > 0 %}
-                        In Stock ({{ product.inventory }})
+                    {% if product.stock > 0 %}
+                        In Stock ({{ product.stock }})
                     {% else %}
                         Out of Stock
                     {% endif %}
                 </p>
 
-                <form action="/add_to_cart" method="POST" class="add-cart-form">
+                <!-- ADD TO CART -->
+                {% if product.stock > 0 %}
 
-                    <input type="hidden" name="product_variant_id" value="">
+                    <form action="/add_to_cart" method="POST" class="add-cart-form">
 
-                    <input type="number" name="quantity" value="1" min="1" class="qty-input">
+                        <!-- VARIANT (AUTO FIRST VARIANT FROM BACKEND) -->
+                        <input type="hidden" name="product_variant_id" value="{{ product.variant_id }}">
 
-                    <button type="submit" disabled>
-                        Select Product First
+                        <!-- QUANTITY LIMITED TO STOCK -->
+                        <input
+                            type="number"
+                            name="quantity"
+                            value="1"
+                            min="1"
+                            max="{{ product.stock }}"
+                            class="qty-input">
+
+                        {% if session.user_id %}
+                            <button type="submit">
+                                Add to Cart
+                            </button>
+                        {% else %}
+                            <button type="submit" formaction="/login">
+                                Login to Buy
+                            </button>
+                        {% endif %}
+
+                    </form>
+
+                {% else %}
+
+                    <button disabled>
+                        Out of Stock
                     </button>
 
-                </form>
+                {% endif %}
 
             </div>
 
