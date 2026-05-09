@@ -7,45 +7,111 @@
 <div class="item-page">
 
     <div class="item-image-section">
-        <img src="{{ product.image_url if product.image_url else '/static/images/products/default.png' }}" class="item-image">
+
+        <img
+            id="mainImage"
+            src="{{ images[0].image_url if images else '/static/images/products/default.png' }}"
+            class="item-image">
+
+        {% if images|length > 1 %}
+
+            <div class="item-gallery">
+
+                {% for image in images %}
+
+                    <img
+                        src="{{ image.image_url }}"
+                        class="gallery-thumb"
+                        onclick="changeImage('{{ image.image_url }}')">
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
     </div>
 
     <div class="item-info-section">
 
         <h1>{{ product.title }}</h1>
 
-        <p class="item-description">{{ product.description }}</p>
+        <p class="item-description">
+            {{ product.description }}
+        </p>
 
-        <p class="item-price">Price: ${{ product.price }}</p>
+        <p class="item-price">
+            Price: ${{ product.price }}
+        </p>
 
-        <p class="item-stock">
-            {% if product.inventory > 0 %}
-                In Stock ({{ product.inventory }})
+        <p class="item-stock" id="stockText">
+
+            {% if variants and variants[0].stock > 0 %}
+                In Stock ({{ variants[0].stock }})
             {% else %}
                 Out of Stock
             {% endif %}
+
         </p>
 
         <form action="/add_to_cart" method="POST" class="add-to-cart-form">
 
-            <select name="product_variant_id" required>
+            <select name="product_variant_id" id="variantSelect" required>
 
                 {% for v in variants %}
-                    <option value="{{ v.id }}">
-                        {{ v.color }} / {{ v.size }} (Stock: {{ v.stock }})
+
+                    <option value="{{ v.id }}" data-stock="{{ v.stock }}">
+                        {{ v.color }} / {{ v.size }}
+                        {% if v.stock > 0 %}
+                            (Stock: {{ v.stock }})
+                        {% else %}
+                            (Out of Stock)
+                        {% endif %}
                     </option>
+
                 {% endfor %}
 
             </select>
 
             <div class="quantity-selector">
-                <label>Quantity:</label>
-                <input type="number" name="quantity" value="1" min="1">
+
+                <label>
+                    Quantity:
+                </label>
+
+                <input
+                    type="number"
+                    name="quantity"
+                    id="qtyInput"
+                    value="1"
+                    min="1"
+                    max="{{ variants[0].stock if variants else 1 }}">
+
             </div>
 
-            <button type="submit">
-                Add to Cart
-            </button>
+            {% if session.user_id %}
+
+                <button
+                    type="submit"
+                    class="add-to-cart-btn"
+                    id="cartButton">
+
+                    Add to Cart
+
+                </button>
+
+            {% else %}
+
+                <button
+                    type="submit"
+                    formaction="/login"
+                    class="add-to-cart-btn">
+
+                    Login to Buy
+
+                </button>
+
+            {% endif %}
 
         </form>
 
@@ -53,8 +119,148 @@
 
 </div>
 
+
+<!-- ADD REVIEW SECTION -->
+<div class="add-review-section">
+
+    <h2 class="reviews-title">Leave a Review</h2>
+
+    {% if session.user_id %}
+
+        <form action="/add_review" method="POST" enctype="multipart/form-data" class="review-form">
+
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+
+            <select name="rating" required>
+                <option value="5">★★★★★ - 5</option>
+                <option value="4">★★★★ - 4</option>
+                <option value="3">★★★ - 3</option>
+                <option value="2">★★ - 2</option>
+                <option value="1">★ - 1</option>
+            </select>
+
+            <textarea
+                name="description"
+                placeholder="Write your review..."
+                required></textarea>
+
+            <input type="file" name="image">
+
+            <button type="submit" class="add-review-btn">
+                Submit Review
+            </button>
+
+        </form>
+
+    {% else %}
+
+        <p class="no-reviews">
+            <a href="/login">Login</a> to leave a review.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<!-- REVIEWS SECTION -->
+<div class="reviews-section">
+
+    <h2 class="reviews-title">Reviews</h2>
+
+    {% if reviews and reviews|length > 0 %}
+
+        {% for r in reviews %}
+
+            <div class="review-card">
+
+                <div class="review-header">
+
+                    <span class="review-user">
+                        {{ r.username }}
+                    </span>
+
+                    <span class="review-rating">
+                        ⭐ {{ r.rating }}/5
+                    </span>
+
+                </div>
+
+                <p class="review-text">
+                    {{ r.description }}
+                </p>
+
+                {% if r.image_url %}
+
+                    <img src="{{ r.image_url }}" class="review-image">
+
+                {% endif %}
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p class="no-reviews">
+            No reviews yet.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<script>
+
+function changeImage(imageUrl) {
+    document.getElementById("mainImage").src = imageUrl;
+}
+
+const variantSelect = document.getElementById("variantSelect");
+const qtyInput = document.getElementById("qtyInput");
+const stockText = document.getElementById("stockText");
+const cartButton = document.getElementById("cartButton");
+
+function updateVariantStock() {
+
+    const selected = variantSelect.options[variantSelect.selectedIndex];
+    const stock = parseInt(selected.dataset.stock);
+
+    qtyInput.max = stock;
+
+    if (parseInt(qtyInput.value) > stock) {
+        qtyInput.value = stock;
+    }
+
+    if (stock > 0) {
+        stockText.innerText = `In Stock (${stock})`;
+
+        if (cartButton) {
+            cartButton.disabled = false;
+            cartButton.innerText = "Add to Cart";
+        }
+
+    } else {
+        stockText.innerText = "Out of Stock";
+        qtyInput.value = 1;
+
+        if (cartButton) {
+            cartButton.disabled = true;
+            cartButton.innerText = "Out of Stock";
+        }
+    }
+}
+
+variantSelect.addEventListener("change", updateVariantStock);
+updateVariantStock();
+
+</script>
+
+
 <style>
-/* Start Item Page (mobile first) */
+
+/* Start Item Page */
 
 .item-page {
     display: flex;
@@ -63,20 +269,51 @@
     padding: 12px;
 }
 
-/* Image */
+/* End Item Page */
+
+
+/* Start Image */
+
 .item-image-section {
     width: 100%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .item-image {
     width: 100%;
     max-height: 300px;
     object-fit: contain;
+    background: #f7f7f7;
 }
 
-/* Info */
+/* End Image */
+
+
+/* Start Gallery */
+
+.item-gallery {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+}
+
+.gallery-thumb {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    background: white;
+    padding: 4px;
+}
+
+/* End Gallery */
+
+
+/* Start Info */
+
 .item-info-section {
     display: flex;
     flex-direction: column;
@@ -88,22 +325,61 @@
     margin: 0;
 }
 
+/* End Info */
+
+
+/* Start Description */
+
 .item-description {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #555;
+    line-height: 1.5;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
+
+/* End Description */
+
+
+/* Start Price */
 
 .item-price {
     font-size: 1.2rem;
     font-weight: bold;
 }
 
+/* End Price */
+
+
+/* Start Stock */
+
 .item-stock {
     font-size: 0.9rem;
     color: #333;
 }
 
-/* Quantity */
+/* End Stock */
+
+
+/* Start Form */
+
+.add-to-cart-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.add-to-cart-form select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* End Form */
+
+
+/* Start Quantity */
+
 .quantity-selector {
     display: flex;
     align-items: center;
@@ -111,30 +387,116 @@
 }
 
 .quantity-selector input {
-    width: 60px;
+    width: 70px;
     padding: 6px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-/* Button */
-.add-to-cart-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+/* End Quantity */
+
+
+/* Start Button */
 
 .add-to-cart-btn {
-    padding: 10px;
+    padding: 12px;
     border: none;
-    background: var(--accent-color);
+    background: var(--secondary-color);
     color: white;
     font-size: 1rem;
     border-radius: 6px;
     cursor: pointer;
 }
 
-/* Desktop upgrade */
+.add-to-cart-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* End Button */
+
+
+/* Start Reviews */
+
+.reviews-section,
+.add-review-section {
+    margin-top: 20px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reviews-title {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.review-form select,
+.review-form textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.review-form textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.add-review-btn {
+    padding: 10px;
+    border: none;
+    background: var(--secondary-color);
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.review-card {
+    padding: 10px;
+    border-bottom: 1px solid #e5e5e5;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+}
+
+.review-text {
+    font-size: 0.9rem;
+    color: #444;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.review-image {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    background: #f7f7f7;
+}
+
+.no-reviews {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+/* End Reviews */
+
+
+/* Start Desktop */
+
 @media (min-width: 768px) {
 
     .item-page {
@@ -151,7 +513,16 @@
         flex: 1;
     }
 
+    .reviews-section,
+    .add-review-section {
+        max-width: 1000px;
+        margin: 20px auto 0 auto;
+    }
+
 }
+
+/* End Desktop */
+
 </style>
 
 {% endblock %}

@@ -845,20 +845,35 @@ def delete_product():
 
     product_id = request.form["product_id"]
 
+    # DELETE CHILD TABLES FIRST (IMPORTANT ORDER)
+
     conn.execute(text("""
-    DELETE FROM product_images WHERE product_id = :pid
+        DELETE FROM discounts
+        WHERE product_id = :pid
     """), {"pid": product_id})
 
     conn.execute(text("""
-    DELETE FROM product_variants WHERE product_id = :pid
+        DELETE FROM product_images
+        WHERE product_id = :pid
     """), {"pid": product_id})
 
     conn.execute(text("""
-    DELETE FROM products
-    WHERE id = :pid
-    AND vendor_id = (
-        SELECT id FROM vendors WHERE user_id = :uid
-    )
+        DELETE FROM product_variants
+        WHERE product_id = :pid
+    """), {"pid": product_id})
+
+    conn.execute(text("""
+        DELETE FROM reviews
+        WHERE product_id = :pid
+    """), {"pid": product_id})
+
+    # NOW SAFE TO DELETE PRODUCT
+    conn.execute(text("""
+        DELETE FROM products
+        WHERE id = :pid
+        AND vendor_id = (
+            SELECT id FROM vendors WHERE user_id = :uid
+        )
     """), {
         "pid": product_id,
         "uid": user.id
@@ -943,40 +958,42 @@ def edit_product(product_id):
         variants=variants
     )
 
-@app.route("/vendor/add-discount/<int:product_id>", methods=["GET","POST"])
+@app.route("/vendor/add-discount/<int:product_id>", methods=["GET", "POST"])
 def add_discount(product_id):
-    user = get_current_user()
-
-    if not user or user.role != "vendor":
-        return redirect(url_for("home"))
-
-    product = conn.execute(text("""
-    SELECT p.*
-    FROM products p
-    JOIN vendors v ON p.vendor_id = v.id
-    WHERE p.id = :pid AND v.user_id = :uid
-    """), {"pid": product_id, "uid": user.id}).fetchone()
-
-    if not product:
-        return "Unauthorized"
 
     if request.method == "POST":
 
-        new_price = float(request.form.get("new_price"))
+        new_price = request.form["new_price"]
+        start_time = request.form.get("start_time")
+        end_time = request.form.get("end_time")
 
+        # DELETE EXISTING DISCOUNT FIRST
         conn.execute(text("""
-        INSERT INTO discounts (product_id, old_price, new_price, start_time, end_time)
-        VALUES (:pid, :old, :new, NOW(), NULL)
+            DELETE FROM discounts
+            WHERE product_id = :pid
+        """), {"pid": product_id})
+
+        # INSERT NEW ONE
+        conn.execute(text("""
+            INSERT INTO discounts
+            (product_id, new_price, start_time, end_time)
+            VALUES (:pid, :price, :start, :end)
         """), {
             "pid": product_id,
-            "old": product.price,
-            "new": new_price
+            "price": new_price,
+            "start": start_time,
+            "end": end_time
         })
 
         conn.commit()
+
         return redirect("/vendor/shop")
 
-    return render_template("vendor/discount.html", product=product)
+    product = conn.execute(text("""
+        SELECT * FROM products WHERE id = :id
+    """), {"id": product_id}).fetchone()
+
+    return render_template("add_discount.html", product=product)
 
 @app.route("/vendor/delete-variant", methods=["POST"])
 def delete_variant():
@@ -1384,7 +1401,7 @@ def add_review():
 
     conn.commit()
 
-    return redirect(f"/search/{product_id}")
+    return redirect(f"/product/{product_id}")
 
 
 
