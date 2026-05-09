@@ -137,15 +137,26 @@ def search():
     stock = request.args.get("stock")
 
     query = """
-    SELECT DISTINCT
+    SELECT
         p.*,
-        pv.id AS variant_id,
-        pv.color,
-        pv.size,
-        pv.stock,
-
         d.new_price,
         d.old_price,
+
+        (
+            SELECT pv.stock
+            FROM product_variants pv
+            WHERE pv.product_id = p.id
+            ORDER BY pv.id ASC
+            LIMIT 1
+        ) AS stock,
+
+        (
+            SELECT pv.id
+            FROM product_variants pv
+            WHERE pv.product_id = p.id
+            ORDER BY pv.id ASC
+            LIMIT 1
+        ) AS variant_id,
 
         (
             SELECT pi.image_url
@@ -156,13 +167,7 @@ def search():
         ) AS image_url
 
     FROM products p
-
-    LEFT JOIN product_variants pv
-        ON pv.product_id = p.id
-
-    LEFT JOIN discounts d
-        ON d.product_id = p.id
-
+    LEFT JOIN discounts d ON d.product_id = p.id
     WHERE (p.title LIKE :q OR p.description LIKE :q)
     """
 
@@ -904,7 +909,7 @@ def manage_variants(product_id):
     SELECT * FROM product_variants WHERE product_id = :pid
     """), {"pid": product_id}).fetchall()
 
-    return render_template("vendor/variants.html", variants=variants, product_id=product_id)
+    return redirect("/vendor/shop")
 
 @app.route("/vendor/edit-product/<int:product_id>", methods=["GET", "POST"])
 def edit_product(product_id):
