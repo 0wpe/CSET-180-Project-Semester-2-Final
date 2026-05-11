@@ -146,81 +146,6 @@ TRUNCATE TABLE users;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
-INSERT INTO users (first_name, last_name, email, username, password, role) VALUES
-('Admin', 'User', 'admin@test.com', 'admin', 'hashed_pw', 'admin'),
-('John', 'Vendor', 'john@shop.com', 'johnvendor', 'hashed_pw', 'vendor'),
-('Sarah', 'Vendor', 'sarah@shop.com', 'sarahvendor', 'hashed_pw', 'vendor'),
-('Mike', 'Customer', 'mike@test.com', 'mike123', 'hashed_pw', 'customer'),
-('Emma', 'Customer', 'emma@test.com', 'emma123', 'hashed_pw', 'customer');
-
-INSERT INTO vendors (user_id) VALUES
-(2),
-(3);
-
-INSERT INTO products (title, description, vendor_id, warranty_period, price, inventory) VALUES
-('Basic T-Shirt', 'Cotton t-shirt', 1, 12, 19.99, 100),
-('Running Shoes', 'Lightweight running shoes', 1, 24, 79.99, 50),
-('Hoodie', 'Warm winter hoodie', 2, 18, 39.99, 80),
-('Snapback Hat', 'Stylish hat', 2, 6, 14.99, 120);
-
-INSERT INTO product_images (product_id, image_url) VALUES
-(1, 'tshirt1.jpg'),
-(1, 'tshirt2.jpg'),
-(2, 'shoes1.jpg'),
-(3, 'hoodie1.jpg'),
-(4, 'hat1.jpg');
-
-INSERT INTO product_variants (product_id, color, size, stock) VALUES
-(1, 'Red', 'M', 10),
-(1, 'Blue', 'L', 5),
-
-(2, 'Black', '42', 8),
-(2, 'White', '43', 6),
-
-(3, 'Black', 'S', 12),
-(3, 'Grey', 'M', 7),
-
-(4, 'Black', 'One Size', 20);
-
-INSERT INTO discounts (product_id, old_price, new_price, start_time, end_time) VALUES
-(2, 79.99, 59.99, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY)),
-(3, 39.99, 29.99, NOW(), DATE_ADD(NOW(), INTERVAL 5 DAY));
-
-INSERT INTO carts (user_id) VALUES
-(4),
-(5);
-
-INSERT INTO cart_items (cart_id, product_variant_id, quantity) VALUES
-(1, 1, 2),
-(1, 3, 1),
-(2, 5, 1),
-(2, 7, 3);
-
-INSERT INTO orders (user_id, status) VALUES
-(4, 'pending'),
-(5, 'confirmed');
-
-INSERT INTO order_items (order_id, product_variant_id, vendor_id, quantity, price_at_purchase) VALUES
-(1, 1, 1, 2, 19.99),
-(1, 3, 1, 1, 79.99),
-
-(2, 5, 2, 1, 39.99),
-(2, 7, 2, 3, 14.99);
-
-INSERT INTO reviews (user_id, product_id, rating, description, image_url) VALUES
-(4, 1, 5, 'Great shirt!', NULL),
-(5, 3, 4, 'Very warm hoodie', NULL);
-
-INSERT INTO complaints (user_id, order_item_id, type, status, title, description) VALUES
-(4, 1, 'return', 'pending', 'Wrong size', 'The shirt is too small'),
-(5, 3, 'refund', 'processing', 'Damaged item', 'Hoodie arrived damaged');
-
-INSERT INTO chat_messages (sender_id, receiver_id, message, image_url) VALUES
-(4, 2, 'Hi, do you have this in stock?', NULL),
-(2, 4, 'Yes, it is available!', NULL),
-(5, 3, 'When will my order ship?', NULL),
-(3, 5, 'It ships tomorrow.', NULL);
-
 select * from cart_items;
 
 
@@ -259,15 +184,13 @@ ADD image_url TEXT;
 ALTER TABLE complaints
 ADD admin_notes TEXT;
 
-INSERT INTO users
-(first_name, last_name, email, username, password, role)
-VALUES
-(
+INSERT INTO users (first_name, last_name, email, username, password, role)
+VALUES (
     'Admin',
     'User',
     'admin@example.com',
     'admin',
-    'scrypt:32768:8:1$8UZvWBzzXnNMtSIp$68a7c8434fb51f7ade2e9feedbf6f43452f5d17e58bb571e6068bdde50d0c114a129777ed32b210466afb9fd641ad23195f5bbb3f7b7a1f0a8248b808792d065',
+    'scrypt:32768:8:1$j184ObyhRZm0kahE$b303456d09f936a2b92f13d2571cee0120c1c1661e1b44130a3be2f2b3df11607b07ad577aa8cd399fa416d2ca1905c922767d309663987ece49d0d2d1e7bb08',
     'admin'
 );
 
@@ -281,7 +204,5 @@ DELETE FROM carts;
 DELETE FROM users;
 
 SET FOREIGN_KEY_CHECKS = 0;
-
-DELETE FROM users WHERE username = 'admin';
 
 SET FOREIGN_KEY_CHECKS = 1;
