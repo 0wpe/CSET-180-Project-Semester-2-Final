@@ -152,11 +152,9 @@ def search():
         d.old_price,
 
         (
-            SELECT pv.stock
+            SELECT COALESCE(SUM(pv.stock), 0)
             FROM product_variants pv
             WHERE pv.product_id = p.id
-            ORDER BY pv.id ASC
-            LIMIT 1
         ) AS stock,
 
         (
@@ -180,20 +178,37 @@ def search():
     WHERE (p.title LIKE :q OR p.description LIKE :q)
     """
 
-    params = {
-        "q": f"%{q}%"
-    }
+    params = {"q": f"%{q}%"}
 
+    # FIX: use EXISTS instead of pv (no join needed)
     if color:
-        query += " AND (pv.color = :color OR pv.color IS NULL)"
+        query += """
+        AND EXISTS (
+            SELECT 1 FROM product_variants pv
+            WHERE pv.product_id = p.id
+            AND pv.color = :color
+        )
+        """
         params["color"] = color
 
     if size:
-        query += " AND (pv.size = :size OR pv.size IS NULL)"
+        query += """
+        AND EXISTS (
+            SELECT 1 FROM product_variants pv
+            WHERE pv.product_id = p.id
+            AND pv.size = :size
+        )
+        """
         params["size"] = size
 
     if stock == "in_stock":
-        query += " AND (pv.stock > 0 OR pv.stock IS NULL)"
+        query += """
+        AND EXISTS (
+            SELECT 1 FROM product_variants pv
+            WHERE pv.product_id = p.id
+            AND pv.stock > 0
+        )
+        """
 
     products = conn.execute(text(query), params).fetchall()
 

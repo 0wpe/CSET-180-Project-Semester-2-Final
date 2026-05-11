@@ -267,3 +267,50 @@ VALUES
 (13,12999.99,10999.99,NOW(),DATE_ADD(NOW(),INTERVAL 10 DAY)),
 (27,9999.99,8499.99,NOW(),DATE_ADD(NOW(),INTERVAL 7 DAY)),
 (29,7999.99,6999.99,NOW(),DATE_ADD(NOW(),INTERVAL 5 DAY));
+
+
+
+
+
+
+UPDATE products SET inventory = CASE title
+
+WHEN 'Asia Coffin' THEN 22
+WHEN 'Canada Urn' THEN 18
+WHEN 'Bowling Urn' THEN 9
+WHEN 'Cammo Casket' THEN 6
+
+WHEN 'Car Urn' THEN 25
+WHEN 'Cheeta Urn' THEN 14
+WHEN 'Cow Casket' THEN 7
+WHEN 'Disco Urn' THEN 30
+
+WHEN 'Dog Urn' THEN 40
+WHEN 'Eagle Urn' THEN 12
+WHEN 'Fish Urn' THEN 33
+WHEN 'Furry Urn' THEN 8
+
+WHEN 'Galaxy Urn' THEN 13
+WHEN 'Gold Casket' THEN 4
+WHEN 'Gold Egg Urn' THEN 6
+WHEN 'Military Casket' THEN 11
+
+WHEN 'Military Urn' THEN 20
+WHEN 'Open Urn' THEN 28
+WHEN 'Orange Casket' THEN 21
+WHEN 'Peanutbutter Urn' THEN 3
+
+WHEN 'Pine Casket' THEN 17
+WHEN 'Pink Casket' THEN 22
+WHEN 'Purple Casket' THEN 19
+WHEN 'Sage Casket' THEN 16
+
+WHEN 'Silver Urn' THEN 24
+WHEN 'Thanos Urn' THEN 2
+WHEN 'Undertaker Urn' THEN 7
+WHEN 'Purple Urn' THEN 26
+
+WHEN 'Rainbow Urn' THEN 19
+
+ELSE inventory
+END;
