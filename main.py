@@ -43,9 +43,6 @@ def is_customer(user):
 def get_current_prices():
     priceslist = conn.execute(text("select prod.id, CASE WHEN prod.id in (select product_id from discounts where start_time IS NULL OR now()<end_time and now()>start_time) THEN (select new_price from products p join discounts d on p.id=d.product_id Where p.id=prod.id) ELSE (select price from products p where p.id=prod.id) end as price from products prod"),
     ).fetchall()
-    # print("Prices:")
-    # print("Product ID, Current Price")
-    # print(priceslist)
     pricedict={}
     for i in priceslist:
         pricedict[i[0]]=i[1]
@@ -78,6 +75,17 @@ def get_cart_total(user_id):
 @app.context_processor
 def inject_user():
     return dict(current_user=get_current_user())
+
+def islimited(variant_id):
+    variants = conn.execute(text("Select id from product_variants where stock < 10")).fetchall()
+    var_list = []
+    for var in variants:
+        var_list.append(var[0])
+
+    if variant_id in var_list:
+        return True
+    else:
+        return False
 
 @app.route("/")
 def home():
@@ -125,7 +133,8 @@ def home():
     return render_template("index.html",
         sponsored=sponsored,
         discounted=discounted,
-        packages=packages
+        packages=packages,
+        islimited=islimited
     )
 
 @app.route("/search")
@@ -246,7 +255,8 @@ def product_page(product_id):
         images=images,
         variants=variants,
         reviews=reviews,
-        avg_rating=avg_rating
+        avg_rating=avg_rating,
+        islimited=islimited
     )
 
 @app.route("/register", methods=["GET", "POST"])
@@ -492,8 +502,6 @@ def purchase():
         print("item price", get_product_varient_price(i[2]))
         conn.execute(text("INSERT INTO order_items (order_id, product_variant_id, vendor_id, quantity, price_at_purchase) VALUES (:order_id, :product_variant_id, :vendor_id, :quantity, :price_at_purchase)"),
             {"order_id":order_id, "product_variant_id":i[2], "vendor_id":vendor_id, "quantity":i[3], "price_at_purchase":get_product_varient_price(i[2])})
-        # print("item:","id",i[0],"cart_id",i[1],"product_varient_id",i[2],"quantity",i[3])
-        # print(i)
 
     conn.execute(text("""
         DELETE FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE user_id = :user_id)    

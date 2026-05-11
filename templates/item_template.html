@@ -62,10 +62,14 @@
 
                     <option value="{{ v.id }}" data-stock="{{ v.stock }}">
                         {{ v.color }} / {{ v.size }}
-                        {% if v.stock > 0 %}
-                            (Stock: {{ v.stock }})
+                        {% if islimited(v.id) %}
+                            <p>act fast only {{v.stock}} left in stock!</p>
                         {% else %}
-                            (Out of Stock)
+                            {% if v.stock > 0 %}
+                                (Stock: {{ v.stock }})
+                            {% else %}
+                                (Out of Stock)
+                            {% endif %}
                         {% endif %}
                     </option>
 
