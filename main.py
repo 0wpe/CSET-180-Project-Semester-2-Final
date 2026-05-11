@@ -315,20 +315,6 @@ def logout():
     session.clear()
     return redirect(url_for("home"))
 
-# def cart_Total(user_id):
-#     cart_items = conn.execute(text("""
-#     SELECT *
-#     FROM cart_items ci
-#     JOIN product_variants pv ON ci.product_variant_id = pv.id
-#     JOIN products p ON pv.product_id = p.id
-#     WHERE ci.cart_id = (SELECT id FROM carts WHERE user_id = :user_id)
-#     """), {"user_id": user_id}).fetchall()
-
-#     total = 0
-#     for i in cart_items:
-#         total += (i.price * i.quantity)
-#     return total
-
 @app.route("/cart")
 def cart():
     if "user_id" not in session:
@@ -343,7 +329,7 @@ def cart():
     SELECT ci.id AS cart_item_id,
     ci.quantity,
     pv.*,
-    p.*
+    p.title
     FROM cart_items ci
     JOIN product_variants pv ON ci.product_variant_id = pv.id
     JOIN products p ON pv.product_id = p.id
@@ -465,7 +451,7 @@ def checkout():
     SELECT ci.id AS cart_item_id,
     ci.quantity,
     pv.*,
-    p.*
+    p.title
     FROM cart_items ci
     JOIN product_variants pv ON ci.product_variant_id = pv.id
     JOIN products p ON pv.product_id = p.id

@@ -8,6 +8,7 @@
     .cart{
         overflow-x:hidden;
         height:fit-content;
+        margin:20px 0px;
     }
 
     .content_container{
@@ -22,6 +23,27 @@
         justify-content:space-between;
         gap:10px;
         min-width:100%;
+    }
+
+    .info_collumn_varient{
+        width:25%;
+        max-width:25%;
+        min-width:25%;
+    }
+
+    .info_collumn_amount{
+        display:flex;
+        justify-content:row;
+        gap:10px;
+        width:25%;
+        max-width:25%;
+        min-width:25%;
+    }
+
+    .info_collumn_price{
+        width:20%;
+        max-width:20%;
+        min-width:20%;
     }
 
     .remove_btn{
@@ -77,6 +99,8 @@
     }
 
     
+
+    
     .money_info{
         justify-content: center;
         align-items: center;
@@ -116,6 +140,24 @@
         }
         .info form button{
             min-width:150px;
+        }
+
+        .info_collumn_varient{
+            width:100%;
+            max-width:100%;
+            min-width:100%;
+        }
+
+        .info_collumn_amount{
+            width:100%;
+            max-width:100%;
+            min-width:100%;
+        }
+
+        .info_collumn_price{
+            width:100%;
+            max-width:100%;
+            min-width:100%;
         }
     }
 </style>
@@ -215,17 +257,24 @@
                             </div>
                             
                             <div class="info">
-                                <p>{{ item.description }}</p>
+                                <!-- <p>{{ item.description }}</p> -->
 
                                 <!-- <p>Item id: {{ item.id }}</p>
                                 
                                 <p>Product varient: {{ item.product_variant_id }}</p> -->
 
                                 <!-- <p>Unit Price: ${{ item.price }}</p> -->
+                                <div class="info_collumn_varient">
+                                    <p>Product variant: {{ item.id }}</p>
+                                </div>
+                                <!-- <p>Unit Price: ${{ item.price }}</p> -->
+                                <div class="info_collumn_amount">
+                                    <p>Quantity:{{ item.quantity }}</p>
+                                </div>
 
-                                <p>Quantity:{{ item.quantity }}</p>
-                                
-                                <p class="price_tag">Price: ${{ prices[item.product_id] * item.quantity }}</p>
+                                <div class="info_collumn_price">
+                                    <p class="price_tag">Price: ${{ prices[item.product_id] * item.quantity }}</p>
+                                </div>
 
                             </div>
                         </div>

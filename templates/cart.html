@@ -3,11 +3,12 @@
     .cart{  
         overflow-x:hidden;
         height:fit-content;
+        margin:20px 0px;
     }
 
     .auth-container2 {
-    height: calc(100vh - var(--topbar-height)); /* subtract top bar height */
-    display: flex;
+        height: calc(100vh - var(--topbar-height)); /* subtract top bar height */
+        display: flex;
     }
 
     .content_container{
@@ -20,8 +21,47 @@
         display:flex;
         flex-direction:row;
         justify-content:space-between;
-        gap:10px;
+        gap:2%;
         min-width:100%;
+    }
+
+    /* .info_collumn_desc{
+        width:20%;
+        max-width:20%;
+        min-width:20%;
+    } */
+
+    /* .info_collumn_item{
+        width:20%;
+        max-width:20%;
+        min-width:20%;
+    } */
+
+    .info_collumn_varient{
+        width:25%;
+        max-width:25%;
+        min-width:25%;
+    }
+
+    .info_collumn_amount{
+        display:flex;
+        justify-content:row;
+        gap:10px;
+        width:25%;
+        max-width:25%;
+        min-width:25%;
+    }
+
+    .info_collumn_price{
+        width:20%;
+        max-width:20%;
+        min-width:20%;
+    }
+
+    .info_collumn_remove{
+        width:5%;
+        max-width:5%;
+        min-width:5%;
     }
 
     .scroll_overflow{
@@ -31,6 +71,7 @@
     .quantity_input{
         width:60px;
         height:20px;
+        transform:translateY(-10px);
     }
 
     .remove_btn{
@@ -41,8 +82,9 @@
         height:30px;
         justify-content:center;
         align-items: center;
-        background:var(--secondary-color);
+        background:var(--secondary-color) !important; 
         border-radius:5px;
+        transform:translateY(-10px);
     }
 
     .price_tag{
@@ -89,6 +131,31 @@
         .info form button{
             min-width:150px;
         }
+
+        .info_collumn_varient{
+            width:100%;
+            max-width:100%;
+            min-width:100%;
+        }
+
+        .info_collumn_amount{
+            width:100%;
+            max-width:100%;
+            min-width:100%;
+            flex-direction:column;
+        }
+
+        .info_collumn_price{
+            width:100%;
+            max-width:100%;
+            min-width:100%;
+        }
+
+        .info_collumn_remove{
+            width:100%;
+            max-width:100%;
+            min-width:100%;
+        }
     }
 </style>
 {% extends "base.html" %}
@@ -108,26 +175,33 @@
                             </div>
                             
                             <div class="info">
-                                <p>{{ item.description }}</p>
-
-                                <p>Item id: {{ item.id }}</p>
-                                
-                                <p>Product varient: {{ item.product_variant_id }}</p>
-
+                                <!-- <div class="info_collumn_desc">
+                                    <p>{{ item.description }}</p>
+                                </div> -->
+                                <!-- <div class="info_collumn_item">
+                                    <p>Item id: {{ item.id }}</p>
+                                </div> -->
+                                <div class="info_collumn_varient">
+                                    <p>Product variant: {{ item.id }}</p>
+                                </div>
                                 <!-- <p>Unit Price: ${{ item.price }}</p> -->
+                                <div class="info_collumn_amount">
+                                    <p>Quantity:</p>
+                                    <form action="/update_cart_quantity" method="post">
+                                        <input type="hidden" name="id" value="{{ item.cart_item_id }}">
+                                        <input type="number" name="quantity" class="quantity_input" value="{{ item.quantity }}" min="1" max="{{ item.stock }}" onchange="this.form.submit()">
+                                    </form>
+                                </div>
+                                <div class="info_collumn_price">
+                                    <p class="price_tag">Price: ${{ prices[item.product_id] * item.quantity }}</p>
+                                </div>
 
-                                <p>Quantity:</p>
-                                <form action="/update_cart_quantity" method="post">
-                                    <input type="hidden" name="id" value="{{ item.cart_item_id }}">
-                                    <input type="number" name="quantity" class="quantity_input" value="{{ item.quantity }}" min="1" max="{{ item.stock }}" onchange="this.form.submit()">
-                                </form>
-
-                                <p class="price_tag">Price: ${{ prices[item.product_id] * item.quantity }}</p>
-
-                                <form action="/remove_cart_item" class="remove_btn" method="post">
-                                    <input type="hidden" name="id" value="{{ item.cart_item_id }}">
-                                    <button class="remove_btn" type="submit"><div class="x">×</div></button>
-                                </form>
+                                <div class="info_collumn_remove">
+                                    <form action="/remove_cart_item" method="post">
+                                        <input type="hidden" name="id" value="{{ item.cart_item_id }}">
+                                        <button class="remove_btn" type="submit"><div class="x">×</div></button>
+                                    </form>
+                                </div>
 
                             </div>
                         </div>
