@@ -41,7 +41,16 @@
         </p>
 
         <p class="item-price">
-            Price: ${{ product.price }}
+
+            {% if discount %}
+                <span class="old-price">Price: ${{ product.price }}</span>
+                <span class="new-price">
+                    ${{ discount.new_price }}
+                </span>
+            {% else %}
+                Price: ${{ product.price }}
+            {% endif %}
+
         </p>
 
         <p class="item-stock" id="stockText">
@@ -498,6 +507,16 @@ updateVariantStock();
 
 /* End Reviews */
 
+.old-price {
+    text-decoration: line-through;
+    color: #999;
+    margin-right: 8px;
+}
+
+.new-price {
+    color: red;
+    font-weight: bold;
+}
 
 /* Start Desktop */
 

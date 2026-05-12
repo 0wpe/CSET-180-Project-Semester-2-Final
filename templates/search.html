@@ -30,20 +30,24 @@
                     {{ product.description }}
                 </p>
 
+                <!-- PRICE -->
                 <div class="price">
 
                     {% if product.new_price %}
 
+                        <!-- ORIGINAL PRICE (STRIKETHROUGH) -->
                         <span class="old-price">
                             ${{ product.price }}
                         </span>
 
+                        <!-- DISCOUNTED PRICE -->
                         <span class="new-price">
                             ${{ product.new_price }}
                         </span>
 
                     {% else %}
 
+                        <!-- NORMAL PRICE -->
                         <span class="normal-price">
                             ${{ product.price }}
                         </span>
@@ -52,6 +56,7 @@
 
                 </div>
 
+                <!-- STOCK -->
                 <p class="stock">
 
                     {% if product.stock and product.stock > 0 %}
@@ -62,14 +67,12 @@
 
                 </p>
 
+                <!-- ADD TO CART -->
                 {% if product.stock and product.stock > 0 %}
 
                     <form action="/add_to_cart" method="POST" class="add-cart-form">
 
-                        <input
-                            type="hidden"
-                            name="product_variant_id"
-                            value="{{ product.variant_id }}">
+                        <input type="hidden" name="product_variant_id" value="{{ product.variant_id }}">
 
                         <input
                             type="number"
@@ -87,12 +90,8 @@
 
                         {% else %}
 
-                            <button
-                                type="submit"
-                                formaction="/login">
-
+                            <button type="submit" formaction="/login">
                                 Login to Buy
-
                             </button>
 
                         {% endif %}
@@ -114,5 +113,29 @@
     {% endfor %}
 
 </div>
+
+<style>
+.price {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.new-price {
+    color: #e11d48;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.normal-price {
+    font-weight: 600;
+}
+</style>
 
 {% endblock %}

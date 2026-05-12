@@ -1,10 +1,7 @@
 USE ecommerce;
 
 SET FOREIGN_KEY_CHECKS = 0;
-SET FOREIGN_KEY_CHECKS = 1;
-
 SET SQL_SAFE_UPDATES = 0;
-SET SQL_SAFE_UPDATES = 1;
 
 /* =========================================================
 CLEAR DATA
@@ -68,7 +65,7 @@ VALUES
 
 
 /* =========================================================
-PRODUCTS (ORDER MATTERS FOR IMAGE MATCHING)
+PRODUCTS
 ========================================================= */
 
 INSERT INTO products (title,description,vendor_id,warranty_period,price,inventory,is_sponsored)
@@ -79,7 +76,7 @@ VALUES
 ('Bowling Urn','Bowling themed memorial urn',6,120,7499.99,9,0),
 ('Cammo Casket','Military camouflage luxury casket',8,365,23999.99,6,0),
 
-('Car Urn','Automotive themed urn series',7,365,8999.99,25,0),
+('Car Urn','Automotive themed urn series',7,365,8999.99,30,0),
 ('Cheeta Urn','Fast-pattern wildlife urn design',5,180,6999.99,14,0),
 ('Cow Casket','Farm styled premium casket',5,365,21999.99,7,0),
 ('Disco Urn','Retro disco themed urn',6,120,5999.99,30,0),
@@ -92,7 +89,7 @@ VALUES
 ('Galaxy Urn','Space themed luxury urn',5,365,11999.99,5,0),
 ('Gold Casket','Luxury gold plated casket',4,365,29999.99,4,0),
 ('Gold Egg Urn','Egg shaped gold memorial urn',5,365,15999.99,6,0),
-('Military Casket','Full ceremonial military casket set',8,365,25999.99,11,0),
+('Military Casket','Full ceremonial military casket set',8,365,25999.99,5,0),
 
 ('Military Urn','Service themed memorial urn',8,365,10999.99,20,0),
 ('Open Urn','Minimal open design urn',7,120,5499.99,28,0),
@@ -113,7 +110,7 @@ VALUES
 
 
 /* =========================================================
-PRODUCT IMAGES (MATCHED EXACTLY TO FILENAMES)
+PRODUCT IMAGES
 ========================================================= */
 
 INSERT INTO product_images (product_id, image_url) VALUES
@@ -227,24 +224,113 @@ INSERT INTO product_images (product_id, image_url) VALUES
 
 
 /* =========================================================
-VARIANTS (ONLY WHERE LOGICAL)
+PRODUCT VARIANTS
 ========================================================= */
 
 INSERT INTO product_variants (product_id,color,size,stock)
 VALUES
+
+(1,'Standard','Small',7),
+(1,'Standard','Medium',7),
+(1,'Standard','Large',8),
+
+(2,'Standard','Small',6),
+(2,'Standard','Medium',6),
+(2,'Standard','Large',6),
+
+(3,'Standard','Small',3),
+(3,'Standard','Medium',3),
+(3,'Standard','Large',3),
+
+(4,'Standard','Small',2),
+(4,'Standard','Medium',2),
+(4,'Standard','Large',2),
+
 (5,'Red','Standard',10),
 (5,'Green','Standard',12),
 (5,'Yellow','Standard',8),
 
+(6,'Standard','Small',4),
+(6,'Standard','Medium',5),
+(6,'Standard','Large',5),
+
+(7,'Standard','Small',2),
+(7,'Standard','Medium',2),
+(7,'Standard','Large',3),
+
+(8,'Standard','Small',10),
+(8,'Standard','Medium',10),
+(8,'Standard','Large',10),
+
+(9,'Standard','Small',13),
+(9,'Standard','Medium',13),
+(9,'Standard','Large',14),
+
+(10,'Standard','Small',4),
+(10,'Standard','Medium',4),
+(10,'Standard','Large',4),
+
+(11,'Standard','Small',11),
+(11,'Standard','Medium',11),
+(11,'Standard','Large',11),
+
+(12,'Standard','Small',2),
+(12,'Standard','Medium',3),
+(12,'Standard','Large',3),
+
+(13,'Standard','Small',1),
+(13,'Standard','Medium',2),
+(13,'Standard','Large',2),
+
+(14,'Standard','Small',1),
+(14,'Standard','Medium',1),
+(14,'Standard','Large',2),
+
+(15,'Standard','Small',2),
+(15,'Standard','Medium',2),
+(15,'Standard','Large',2),
+
 (16,'Standard','Full',5),
+
 (17,'Standard','Standard',20),
 
+(18,'Standard','Small',9),
+(18,'Standard','Medium',9),
+(18,'Standard','Large',10),
+
+(19,'Standard','Small',7),
+(19,'Standard','Medium',7),
+(19,'Standard','Large',7),
+
+(20,'Standard','Small',1),
+(20,'Standard','Medium',1),
+(20,'Standard','Large',1),
+
+(21,'Standard','Small',5),
+(21,'Standard','Medium',6),
+(21,'Standard','Large',6),
+
 (22,'Pink','Large',22),
+
 (23,'Purple','Large',19),
+
 (24,'Sage','Large',16),
 
 (25,'Silver','Medium',24),
-(28,'Purple','Large',26);
+
+(26,'Standard','Small',1),
+(26,'Standard','Medium',1),
+(26,'Standard','Large',0),
+
+(27,'Standard','Small',2),
+(27,'Standard','Medium',2),
+(27,'Standard','Large',3),
+
+(28,'Purple','Large',26),
+
+(29,'Standard','Small',4),
+(29,'Standard','Medium',4),
+(29,'Standard','Large',5);
 
 
 /* =========================================================
@@ -259,7 +345,7 @@ VALUES
 
 
 /* =========================================================
-DISCOUNTS (OPTIONAL)
+DISCOUNTS
 ========================================================= */
 
 INSERT INTO discounts (product_id,old_price,new_price,start_time,end_time)
@@ -268,49 +354,28 @@ VALUES
 (27,9999.99,8499.99,NOW(),DATE_ADD(NOW(),INTERVAL 7 DAY)),
 (29,7999.99,6999.99,NOW(),DATE_ADD(NOW(),INTERVAL 5 DAY));
 
+UPDATE products
+SET title = 'Lightning McQueen Urn',
+    description = 'Red racing themed memorial urn inspired by Lightning McQueen',
+    is_sponsored = 1
+WHERE id = 5;
+
+UPDATE products
+SET is_sponsored = 1
+WHERE id IN (19, 9, 5, 25, 11, 18);
+
+INSERT INTO discounts (product_id,old_price,new_price,start_time,end_time)
+VALUES
+(9,3999.99,3499.99,NOW(),DATE_ADD(NOW(),INTERVAL 6 DAY)),
+(25,8999.99,7999.99,NOW(),DATE_ADD(NOW(),INTERVAL 6 DAY)),
+(11,4999.99,4499.99,NOW(),DATE_ADD(NOW(),INTERVAL 6 DAY));
+
+INSERT INTO products (title,description,vendor_id,warranty_period,price,inventory,is_sponsored)
+VALUES
+('Car Casket','Automotive themed luxury casket series',7,365,19999.99,12,0),
+('Car Coffin','Automotive themed premium coffin series',7,365,22999.99,10,0);
 
 
 
-
-
-UPDATE products SET inventory = CASE title
-
-WHEN 'Asia Coffin' THEN 22
-WHEN 'Canada Urn' THEN 18
-WHEN 'Bowling Urn' THEN 9
-WHEN 'Cammo Casket' THEN 6
-
-WHEN 'Car Urn' THEN 25
-WHEN 'Cheeta Urn' THEN 14
-WHEN 'Cow Casket' THEN 7
-WHEN 'Disco Urn' THEN 30
-
-WHEN 'Dog Urn' THEN 40
-WHEN 'Eagle Urn' THEN 12
-WHEN 'Fish Urn' THEN 33
-WHEN 'Furry Urn' THEN 8
-
-WHEN 'Galaxy Urn' THEN 13
-WHEN 'Gold Casket' THEN 4
-WHEN 'Gold Egg Urn' THEN 6
-WHEN 'Military Casket' THEN 11
-
-WHEN 'Military Urn' THEN 20
-WHEN 'Open Urn' THEN 28
-WHEN 'Orange Casket' THEN 21
-WHEN 'Peanutbutter Urn' THEN 3
-
-WHEN 'Pine Casket' THEN 17
-WHEN 'Pink Casket' THEN 22
-WHEN 'Purple Casket' THEN 19
-WHEN 'Sage Casket' THEN 16
-
-WHEN 'Silver Urn' THEN 24
-WHEN 'Thanos Urn' THEN 2
-WHEN 'Undertaker Urn' THEN 7
-WHEN 'Purple Urn' THEN 26
-
-WHEN 'Rainbow Urn' THEN 19
-
-ELSE inventory
-END;
+SET SQL_SAFE_UPDATES = 1;
+SET FOREIGN_KEY_CHECKS = 1;

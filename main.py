@@ -264,6 +264,16 @@ def product_page(product_id):
         WHERE product_id = :id
     """), {"id": product_id}).fetchone()[0]
 
+    # ✅ ADD THIS: active discount
+    discount = conn.execute(text("""
+        SELECT *
+        FROM discounts
+        WHERE product_id = :id
+        AND (start_time IS NULL OR NOW() >= start_time)
+        AND (end_time IS NULL OR NOW() <= end_time)
+        LIMIT 1
+    """), {"id": product_id}).fetchone()
+
     return render_template(
         "item_template.html",
         product=product,
@@ -271,7 +281,8 @@ def product_page(product_id):
         variants=variants,
         reviews=reviews,
         avg_rating=avg_rating,
-        islimited=islimited
+        islimited=islimited,
+        discount=discount
     )
 
 @app.route("/register", methods=["GET", "POST"])
@@ -638,27 +649,63 @@ def cancel_order():
 def vendor_shop():
 
     user = get_current_user()
+
     if not user or user.role != "vendor":
         return redirect(url_for("login"))
 
     vendor = conn.execute(text("""
-        SELECT id FROM vendors WHERE user_id = :uid
+        SELECT id
+        FROM vendors
+        WHERE user_id = :uid
     """), {"uid": user.id}).fetchone()
 
     products = conn.execute(text("""
-        SELECT p.*,
-        (
-            SELECT pi.image_url
-            FROM product_images pi
-            WHERE pi.product_id = p.id
-            ORDER BY pi.id ASC
-            LIMIT 1
-        ) AS image_url
-        FROM products p
-        WHERE p.vendor_id = :vendor_id
-    """), {"vendor_id": vendor.id}).fetchall()
+        SELECT 
+            p.*,
 
-    return render_template("vendor/shop.html", products=products)
+            d.new_price,
+
+            CASE
+                WHEN d.id IS NOT NULL
+                AND (
+                    (d.start_time IS NULL OR NOW() >= d.start_time)
+                    AND
+                    (d.end_time IS NULL OR NOW() <= d.end_time)
+                )
+                THEN p.price
+                ELSE NULL
+            END AS old_price,
+
+            (
+                SELECT pi.image_url
+                FROM product_images pi
+                WHERE pi.product_id = p.id
+                ORDER BY pi.id ASC
+                LIMIT 1
+            ) AS image_url
+
+        FROM products p
+
+        LEFT JOIN discounts d
+            ON p.id = d.product_id
+            AND (
+                (d.start_time IS NULL OR NOW() >= d.start_time)
+                AND
+                (d.end_time IS NULL OR NOW() <= d.end_time)
+            )
+
+        WHERE p.vendor_id = :vendor_id
+
+        ORDER BY p.id DESC
+
+    """), {
+        "vendor_id": vendor.id
+    }).fetchall()
+
+    return render_template(
+        "vendor/shop.html",
+        products=products
+    )
 
 @app.route("/vendor/create-product", methods=["GET", "POST"])
 def create_product():
