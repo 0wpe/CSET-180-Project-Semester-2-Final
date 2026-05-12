@@ -9,35 +9,36 @@ body.no-scroll {
     overflow: hidden;
 }
 
-.thank_you{
-    z-index:10000;
-    border:1px black solid;
-    border-radius:5px;
-    width:fit-content;
-    position:fixed;
-    top:50%;
-    left:50%;
+/* ===================== THANK YOU POPUP ===================== */
+.thank_you {
+    z-index: 10000;
+    border: 1px black solid;
+    border-radius: 5px;
+    width: fit-content;
+    position: fixed;
+    top: 50%;
+    left: 50%;
     transform: translate(-50%, -50%);
     padding: 10px 16px;
     background-color: white;
 }
 
-.thank_you_button{
-    width:fit-content;
-    margin:0px auto;
+.thank_you_button {
+    width: fit-content;
+    margin: 0px auto;
 }
 
-.filter{
+.filter {
     position: fixed;
     top: 0;
     left: 0;
     z-index: 9999;
-    width:100vw;
-    height:100vh;
+    width: 100vw;
+    height: 100vh;
     background-color: rgba(0,0,0,.75);
 }
 
-/* ===== HORIZONTAL SCROLL 2-ROW GRID ===== */
+/* ===================== HORIZONTAL SCROLL ===================== */
 .scroll-section {
     overflow-x: auto;
     padding: 10px 0;
@@ -51,41 +52,198 @@ body.no-scroll {
     gap: 12px;
     width: max-content;
 }
+
+/* ===================== PRODUCTS GRID ===================== */
+.products-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (min-width: 600px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 12px;
+    }
+}
+
+@media (min-width: 900px) {
+    .products-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .products-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* ===================== PRODUCT CARD ===================== */
+.product-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    padding: 12px;
+    background: white;
+    border-bottom: 1px solid #e6e6e6;
+    transition: background 0.2s ease;
+    height: 100%;
+    min-height: 100%;
+}
+
+.product-card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+    border-radius: 4px;
+}
+
+.product-card h3 {
+    margin: 10px 0 5px;
+    font-size: 1rem;
+}
+
+.product-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.product-card:hover {
+    background: #f7f7f7;
+}
+
+@media (hover: none) {
+    .product-card:hover {
+        background: white;
+    }
+}
+
+/* ===================== HEADERS ===================== */
+h2 {
+    margin: 16px 10px 10px;
+    font-size: 18px;
+}
+
+@media (max-width: 600px) {
+    .product-card img {
+        height: 140px;
+    }
+
+    .product-card {
+        padding: 10px;
+    }
+
+    h2 {
+        font-size: 16px;
+    }
+}
+
+/* ===================== SPECIAL LABELS ===================== */
+.product-card.discount {
+    border-left: 3px solid #ff4d4d;
+}
+
+.product-card.package {
+    border-left: 3px solid #4caf50;
+}
+
+.product-card.sponsored {
+    border-left: 3px solid #ffb400;
+}
+
 </style>
 
 {% if thank %}
-    <div class="filter"></div>
+<div class="filter"></div>
 
-    <div class="thank_you">
-        <h2>Thank you for your purchase!</h2>
-        <div class="thank_you_button">
-            <button onclick="closeMessage()">Close</button>
-        </div>
+<div class="thank_you">
+    <h2>Thank you for your purchase!</h2>
+    <div class="thank_you_button">
+        <button onclick="closeMessage()">Close</button>
     </div>
+</div>
 
-    <script>
-        document.body.classList.add("no-scroll");
-    </script>
+<script>
+document.body.classList.add("no-scroll");
+</script>
 {% endif %}
 
 <script>
 function closeMessage(){
-    const filter=document.getElementsByClassName("filter")[0]
-    const message=document.getElementsByClassName("thank_you")[0]
-    filter.style.display="none";
-    message.style.display="none";
+    const filter = document.getElementsByClassName("filter")[0];
+    const message = document.getElementsByClassName("thank_you")[0];
+    filter.style.display = "none";
+    message.style.display = "none";
     document.body.classList.remove("no-scroll");
 }
 </script>
 
-<!-- ===================== SPONSORED ===================== -->
+<!-- ===================== SIDEBAR ===================== -->
+<!--<div class="sidebar">-->
+
+<!--    <h3 class="sidebar-title">Menu</h3>-->
+
+<!--    <a href="/account" class="sidebar-item">-->
+<!--        <h4>My Account</h4>-->
+<!--    </a>-->
+
+<!--    {% if current_user.role == "vendor" %}-->
+<!--        <a href="/vendor/orders" class="sidebar-item">-->
+<!--            <h4>Manage Orders</h4>-->
+<!--        </a>-->
+
+<!--        <a href="/vendor/shop" class="sidebar-item">-->
+<!--            <h4>My Shop</h4>-->
+<!--        </a>-->
+<!--    {% elif current_user.role == "customer" %}-->
+<!--        <a href="/orders" class="sidebar-item">-->
+<!--            <h4>Track Orders</h4>-->
+<!--        </a>-->
+<!--    {% endif %}-->
+
+<!--    <a href="/inbox" class="sidebar-item">-->
+<!--        <h4>Inbox</h4>-->
+<!--    </a>-->
+
+<!--    {% if admin %}-->
+<!--    <a href="/chat/{{ admin.id }}" class="sidebar-item">-->
+<!--        <h4>Contact Support</h4>-->
+<!--    </a>-->
+<!--{% endif %}-->
+
+<!--    {% if current_user.role == "customer" %}-->
+<!--        <a href="/complaints" class="sidebar-item">-->
+<!--            <h4>Complaints</h4>-->
+<!--        </a>-->
+<!--    {% elif current_user.role == "admin" %}-->
+<!--        <a href="/admin/complaints" class="sidebar-item">-->
+<!--            <h4>Manage Complaints</h4>-->
+<!--        </a>-->
+<!--    {% endif %}-->
+
+<!--    <a href="/logout" class="sidebar-item">-->
+<!--        <h4>Logout</h4>-->
+<!--    </a>-->
+
+<!--</div>-->
+
+<!-- ===================== MAIN CONTENT ===================== -->
+
+<!-- SPONSORED -->
 <h2>Sponsored</h2>
 
 <div class="scroll-section">
     <div class="scroll-grid">
 
         {% for product in sponsored %}
-            <a href="/product/{{ product.id }}" class="product-card">
+            <a href="/product/{{ product.id }}" class="product-card sponsored">
                 <img src="{{ product.image_url }}">
                 <h3>{{ product.title }}</h3>
                 <p>${{ product.price }}</p>
@@ -95,7 +253,7 @@ function closeMessage(){
     </div>
 </div>
 
-<!-- ===================== DISCOUNTED ===================== -->
+<!-- DISCOUNTED -->
 <h2>Discounted Deals</h2>
 
 <div class="scroll-section">

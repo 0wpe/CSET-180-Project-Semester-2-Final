@@ -375,7 +375,28 @@ VALUES
 ('Car Casket','Automotive themed luxury casket series',7,365,19999.99,12,0),
 ('Car Coffin','Automotive themed premium coffin series',7,365,22999.99,10,0);
 
+SET @car_casket_id = (SELECT id FROM products WHERE title = 'Car Casket' LIMIT 1);
+SET @car_coffin_id = (SELECT id FROM products WHERE title = 'Car Coffin' LIMIT 1);
 
+INSERT INTO product_images (product_id, image_url)
+VALUES
+(@car_casket_id,'/static/images/products/car_red_casket.jpg'),
+(@car_casket_id,'/static/images/products/car_green_casket.jpg'),
+(@car_casket_id,'/static/images/products/car_yellow_casket.jpg'),
+
+(@car_coffin_id,'/static/images/products/car_red_coffin.jpg'),
+(@car_coffin_id,'/static/images/products/car_green_coffin.jpg'),
+(@car_coffin_id,'/static/images/products/car_yellow_coffin.jpg');
+
+INSERT INTO product_variants (product_id,color,size,stock)
+VALUES
+(@car_casket_id,'Red','Standard',4),
+(@car_casket_id,'Green','Standard',4),
+(@car_casket_id,'Yellow','Standard',4),
+
+(@car_coffin_id,'Red','Standard',3),
+(@car_coffin_id,'Green','Standard',3),
+(@car_coffin_id,'Yellow','Standard',4);
 
 SET SQL_SAFE_UPDATES = 1;
 SET FOREIGN_KEY_CHECKS = 1;
